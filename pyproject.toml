@@ -1,0 +1,11 @@
+[project]
+name = "peak-analyzer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.4.2",
+    "pandas>=3.0.0",
+    "scipy>=1.17.0",
+]
