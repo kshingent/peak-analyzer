@@ -1,7 +1,3 @@
-Based on the content provided, here is a detailed English version of the README.md for **peak-analyzer**. I have expanded on the technical definitions and logic while maintaining a factual, understated tone as requested.
-
----
-
 # peak-analyzer
 
 ## Core Algorithm: Topography-Aware Multidimensional Peak Detection
