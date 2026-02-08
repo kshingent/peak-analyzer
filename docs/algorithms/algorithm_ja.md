@@ -217,9 +217,10 @@ PeakAnalyzerは階層化されたモジュラー設計を採用し、地形学�
 peak_analyzer/
 ├── peak_analyzer/                    # メインパッケージ
 │   ├── __init__.py                   # パッケージエントリポイント
+│   ├── models.py                    # 中央データ構造定義
 │   ├── api/                         # ユーザーAPI層
 │   │   ├── peak_detector.py         # メイン分析クラス
-│   │   ├── result_dataframe.py      # 結果データ構造
+│   │   ├── result_dataframe.py      # 結果データフレーム処理
 │   │   └── parameter_validation.py  # パラメータ検証
 │   │
 │   ├── core/                        # コアアルゴリズム層
@@ -303,6 +304,27 @@ peak_analyzer/
 #### 1. **api/** - ユーザーAPI層
 地形学的ピーク分析のための統一インターフェースを提供
 
+**models.py**: 中央データ構造定義
+```python
+@dataclass
+class Peak:
+    position: IndexTuple | CoordTuple
+    height: float
+    area: int
+    prominence: float | None = None
+
+@dataclass 
+class VirtualPeak:
+    position: IndexTuple | CoordTuple
+    height: float
+    is_boundary_artifact: bool = False
+
+@dataclass
+class SaddlePoint:
+    position: IndexTuple | CoordTuple
+    height: float
+```
+
 **peak_detector.py**: メイン分析エンジン
 ```python
 class PeakAnalyzer:
@@ -316,7 +338,7 @@ class PeakAnalyzer:
     def get_virtual_peaks(self, peaks) -> VirtualPeakCollection
 ```
 
-**result_dataframe.py**: 結果データ構造
+**result_dataframe.py**: 結果データフレーム処理
 ```python
 class PeakCollection:
     def filter(self, **criteria) -> 'PeakCollection'

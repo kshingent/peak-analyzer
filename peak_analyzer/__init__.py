@@ -11,7 +11,8 @@ boundary handling, and advanced feature extraction.
 
 # Core components
 from .api.peak_detector import PeakAnalyzer
-from .api.result_dataframe import Peak, LazyDataFrame
+from .models import Peak
+from .api.result_dataframe import LazyDataFrame
 
 # Layer imports with submodule access
 from . import features

@@ -10,7 +10,7 @@ import numpy as np
 from scipy.ndimage import maximum_filter, binary_dilation, label
 
 from .base_strategy import BaseStrategy, StrategyConfig
-from ..api.result_dataframe import Peak
+from ..models import Peak
 from ..core.plateau_detector import PlateauDetector, PlateauRegion
 from ..core.prominence_calculator import ProminenceCalculator
 from ..connectivity.connectivity_types import get_k_connectivity

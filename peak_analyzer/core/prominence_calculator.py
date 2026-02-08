@@ -9,7 +9,7 @@ import numpy as np
 from dataclasses import dataclass
 import heapq
 
-from ..api.result_dataframe import Peak
+from ..models import Peak
 from ..connectivity.path_finder import PathFinder
 
 

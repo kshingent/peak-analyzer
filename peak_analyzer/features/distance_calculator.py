@@ -11,7 +11,7 @@ from scipy.spatial.distance import cdist, squareform
 from scipy.cluster.hierarchy import linkage, fcluster
 
 from .base_calculator import BaseCalculator
-from ..api.result_dataframe import Peak
+from ..models import Peak
 from ..connectivity.distance_metrics import MinkowskiDistance
 
 

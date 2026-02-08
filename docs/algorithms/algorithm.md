@@ -203,9 +203,10 @@ PeakAnalyzer employs a layered, modular architecture that provides a comprehensi
 peak_analyzer/
 ├── peak_analyzer/                    # Main package
 │   ├── __init__.py                   # Package entry point
+│   ├── models.py                    # Central data structure definitions
 │   ├── api/                         # User API Layer
 │   │   ├── peak_detector.py         # Main analysis class
-│   │   ├── result_dataframe.py      # Result data structures
+│   │   ├── result_dataframe.py      # Result dataframe processing
 │   │   └── parameter_validation.py  # Parameter validation
 │   │
 │   ├── core/                        # Core Algorithm Layer
@@ -289,6 +290,27 @@ peak_analyzer/
 #### 1. **api/** - User API Layer
 Provides unified interface for topographic peak analysis
 
+**models.py**: Central data structure definitions
+```python
+@dataclass
+class Peak:
+    position: IndexTuple | CoordTuple
+    height: float
+    area: int
+    prominence: float | None = None
+
+@dataclass 
+class VirtualPeak:
+    position: IndexTuple | CoordTuple
+    height: float
+    is_boundary_artifact: bool = False
+
+@dataclass
+class SaddlePoint:
+    position: IndexTuple | CoordTuple
+    height: float
+```
+
 **peak_detector.py**: Main analysis engine
 ```python
 class PeakAnalyzer:
@@ -302,7 +324,7 @@ class PeakAnalyzer:
     def get_virtual_peaks(self, peaks) -> VirtualPeakCollection
 ```
 
-**result_dataframe.py**: Result data structures
+**result_dataframe.py**: Result dataframe processing
 ```python
 class PeakCollection:
     def filter(self, **criteria) -> 'PeakCollection'

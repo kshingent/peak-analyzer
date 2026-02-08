@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 
 from .base_calculator import BaseCalculator
-from ..api.result_dataframe import Peak
+from ..models import Peak
 
 
 class GeometricCalculator(BaseCalculator):
