@@ -9,8 +9,8 @@ from typing import Any
 import numpy as np
 from scipy import ndimage
 from scipy.ndimage import label, binary_erosion, binary_dilation
-from skimage.morphology import watershed, disk, ball
-from skimage.segmentation import find_boundaries
+from skimage.morphology import disk, ball
+from skimage.segmentation import find_boundaries, watershed
 
 from .base_calculator import BaseCalculator
 from peak_analyzer.models import Peak

@@ -12,7 +12,6 @@ from scipy.cluster.hierarchy import linkage, fcluster
 
 from .base_calculator import BaseCalculator
 from peak_analyzer.models import Peak
-from peak_analyzer.connectivity.distance_metrics import MinkowskiDistance
 
 
 class DistanceCalculator(BaseCalculator):
@@ -36,7 +35,24 @@ class DistanceCalculator(BaseCalculator):
         """
         super().__init__(scale)
         self.minkowski_p = minkowski_p
-        self._distance_calculator = MinkowskiDistance(p=minkowski_p, scale=scale)
+    
+    def _calculate_minkowski_distance(self, pos1: tuple, pos2: tuple) -> float:
+        """Calculate Minkowski distance between two positions."""
+        pos1_arr = np.array(pos1, dtype=float)
+        pos2_arr = np.array(pos2, dtype=float)
+        
+        # Apply scale if available
+        if self.scale is not None:
+            scale_arr = np.array(self.scale)
+            pos1_arr *= scale_arr
+            pos2_arr *= scale_arr
+        
+        # Calculate Minkowski distance
+        diff = np.abs(pos1_arr - pos2_arr)
+        if np.isinf(self.minkowski_p):
+            return float(np.max(diff))  # Chebyshev distance
+        else:
+            return float(np.power(np.sum(np.power(diff, self.minkowski_p)), 1.0 / self.minkowski_p))
     
     def calculate_features(self, peaks: list[Peak], data: np.ndarray, **kwargs) -> dict[Peak, dict[str, Any]]:
         """
@@ -479,17 +495,7 @@ class DistanceCalculator(BaseCalculator):
         # Scale positions
         scaled_positions = positions_array * scale
         
-        # Calculate pairwise distances using MinkowskiDistance calculator
-        n_peaks = len(scaled_positions)
-        distance_matrix = np.zeros((n_peaks, n_peaks))
-        
-        for i in range(n_peaks):
-            for j in range(i + 1, n_peaks):
-                dist = self._distance_calculator.calculate_distance(
-                    tuple(scaled_positions[i]), tuple(scaled_positions[j])
-                )
-                distance_matrix[i, j] = dist
-                distance_matrix[j, i] = dist
+        distance_matrix = cdist(scaled_positions, scaled_positions, metric='minkowski', p=self.minkowski_p)
         
         return distance_matrix
     

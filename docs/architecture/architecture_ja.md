@@ -65,33 +65,18 @@ peak_analyzer/
 │   │
 │   ├── connectivity/                 # 接続性定義レイヤー
 │   │   ├── connectivity_types.py    # N次元接続性定義
-│   │   ├── neighbor_generator.py    # 近傍生成器
-│   │   ├── path_finder.py          # パス探索アルゴリズム
-│   │   └── distance_metrics.py      # 距離メトリック実装
+│   │   └── neighbor_generator.py    # 簡素化された近傍生成器
 │   │
 │   ├── coordinate_system/           # 座標系レイヤー
 │   │   ├── grid_manager.py         # インデックス ↔ 座標変換・空間操作
 │   │   ├── coordinate_mapping.py   # マッピング定義・検証
 │   │   └── spatial_indexing.py     # 空間インデックス・検索高速化
 │   │
-│   ├── boundary/                    # 境界処理レイヤー
-│   │   ├── boundary_handler.py      # 境界条件処理
-│   │   ├── edge_detector.py        # エッジ効果検出
-│   │   ├── padding_strategies.py   # パディング戦略
-│   │   └── artifact_filter.py      # アーティファクト除去
-│   │
 │   ├── data/                       # データ管理レイヤー
-│   │   ├── lazy_dataframe.py       # 遅延評価データフレーム
-│   │   ├── peak_collection.py      # ピーク集合管理
-│   │   ├── cache_manager.py        # キャッシュ管理
-│   │   └── memory_optimizer.py     # メモリ最適化
+│   │   └── validation.py           # 入力検証
 │   │
 │   └── utils/                      # ユーティリティレイヤー
-│       ├── validation.py           # 入力検証
-│       ├── performance_profiler.py # パフォーマンスプロファイリング
-│       ├── error_handling.py       # エラーハンドリング
-│       ├── logging_config.py       # ログ設定
-│       └── type_definitions.py     # 型定義
+│       └── general.py              # 一般用ユーティリティ関数
 │
 ├── tests/                          # テストスイート
 │   ├── unit/                      # ユニットテスト
@@ -149,23 +134,24 @@ peak_analyzer/
 **distance_calculator.py**: 距離・接続特徴量
 
 ### 5. **connectivity/** - 接続性定義レイヤー
-N次元空間における接続性とパス探索
+N次元空間における接続性
 
 ### 6. **coordinate_system/** - 座標系レイヤー
-インデックス空間と座標空間の変換の統一管理
+インデックス空間と座標空間変換の統一管理
 
-**grid_manager.py**: インデックス ↔ 座標変換と空間操作
+**grid_manager.py**: インデックス ↔ 座標変換・空間操作
 **coordinate_mapping.py**: マッピング定義
+**spatial_indexing.py**: 空間インデックス・検索高速化
 
-### 7. **boundary/** - 境界処理レイヤー
-データ境界での適切な処理
+### 7. **data/** - データ管理レイヤー
+入力検証とデータ前処理
 
-**boundary_handler.py**: 境界条件処理
+**validation.py**: 入力検証とデータ前処理
 
-### 8. **data/** - データ管理レイヤー
-効率的なデータ処理とメモリ管理
+### 8. **utils/** - ユーティリティレイヤー
+一般的なユーティリティ機能
 
-**lazy_dataframe.py**: 遅延評価データフレーム
+**general.py**: 共通ユーティリティ関数とヘルパー
 
 ## データフローと相互作用
 

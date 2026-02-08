@@ -30,7 +30,6 @@ class UnionFind:
 class UnionFindStrategy:
     def detect_peaks_and_prominence(data, connectivity, boundary) -> list[Peak]
     def _build_height_priority_graph(data) -> Graph
-    def _trace_prominence_paths(peaks, graph) -> dict[Peak, float]
 ```
 
 ### **strategies/plateau_first_strategy.py**
@@ -138,7 +137,6 @@ class PlateauDetector:
 class ProminenceCalculator:
     def calculate_prominence(self, peak, data, wlen=None) -> float
     def find_prominence_base(self, peak, data) -> Coordinate
-    def trace_descent_path(self, start_point, data) -> Path
     def handle_boundary_cases(self, peak, data) -> float
 ```
 
@@ -178,7 +176,6 @@ class DistanceCalculator(BaseCalculator):
     def calculate_minkowski_distance(self, point1, point2, p, scale) -> float
     def find_nearest_higher_peak(self, peak, all_peaks) -> tuple[Peak, float]
     def calculate_peak_density(self, center, peaks, radius) -> float
-    def calculate_watershed_distance(self, peak1, peak2, data) -> float
 ```
 
 ## 接続性と座標系クラス

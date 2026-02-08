@@ -10,8 +10,6 @@ from dataclasses import dataclass
 import heapq
 
 from peak_analyzer.models import Peak
-from peak_analyzer.connectivity.path_finder import PathFinder
-
 
 @dataclass
 class ProminenceResult:
@@ -51,7 +49,6 @@ class ProminenceCalculator:
         """
         self.connectivity = connectivity
         self.boundary_condition = boundary_condition
-        self.path_finder = PathFinder(connectivity)
         
     def calculate_prominence(self, peak: Peak, data: np.ndarray, wlen: float | None = None) -> float:
         """

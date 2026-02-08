@@ -64,33 +64,18 @@ peak_analyzer/
 │   │
 │   ├── connectivity/                 # Connectivity Definition Layer
 │   │   ├── connectivity_types.py    # N-dimensional connectivity definitions
-│   │   ├── neighbor_generator.py    # Neighbor generator
-│   │   ├── path_finder.py          # Path finding algorithms
-│   │   └── distance_metrics.py      # Distance metric implementations
+│   │   └── neighbor_generator.py    # Simplified neighbor generation
 │   │
 │   ├── coordinate_system/           # Coordinate System Layer
 │   │   ├── grid_manager.py         # Index ↔ Coordinate conversion & spatial operations
 │   │   ├── coordinate_mapping.py   # Mapping definitions and validation
 │   │   └── spatial_indexing.py     # Spatial indexing and search acceleration
 │   │
-│   ├── boundary/                    # Boundary Processing Layer
-│   │   ├── boundary_handler.py      # Boundary condition processing
-│   │   ├── edge_detector.py        # Edge effect detection
-│   │   ├── padding_strategies.py   # Padding strategies
-│   │   └── artifact_filter.py      # Artifact removal
-│   │
-│   ├── data/                       # Data Management Layer
-│   │   ├── lazy_dataframe.py       # Lazy evaluation dataframe
-│   │   ├── peak_collection.py      # Peak collection management
-│   │   ├── cache_manager.py        # Cache management
-│   │   └── memory_optimizer.py     # Memory optimization
-│   │
-│   └── utils/                      # Utility Layer
-│       ├── validation.py           # Input validation
-│       ├── performance_profiler.py # Performance profiling
-│       ├── error_handling.py       # Error handling
-│       ├── logging_config.py       # Logging configuration
-│       └── type_definitions.py     # Type definitions
+   ├── data/                       # Data Management Layer
+   │   └── validation.py           # Input validation
+   │
+   └── utils/                      # Utility Layer
+       └── general.py              # General utility functions
 │
 ├── tests/                          # Test Suite
 │   ├── unit/                      # Unit tests
@@ -148,34 +133,33 @@ Comprehensive computation framework for topographic features
 **distance_calculator.py**: Distance & connectivity features
 
 ### 5. **connectivity/** - Connectivity Definition Layer
-Connectivity and path finding in N-dimensional space
+Connectivity in N-dimensional space
 
 ### 6. **coordinate_system/** - Coordinate System Layer
 Unified management of index space and coordinate space transformations
 
 **grid_manager.py**: Index ↔ Coordinate conversion and spatial operations
 **coordinate_mapping.py**: Mapping definitions
+**spatial_indexing.py**: Spatial indexing and search acceleration
 
-### 7. **boundary/** - Boundary Processing Layer
-Proper handling at data boundaries
+### 7. **data/** - Data Management Layer
+Input validation and data preprocessing
 
-**boundary_handler.py**: Boundary condition processing
+**validation.py**: Input validation and data preprocessing
 
-### 8. **data/** - Data Management Layer
-Efficient data processing and memory management
+### 8. **utils/** - Utility Layer
+General utility functions
 
-**lazy_dataframe.py**: Lazy evaluation dataframe
+**general.py**: Common utility functions and helpers
 
 ## Data Flow and Interactions
 
 ```mermaid
 flowchart TD
     A[Data Input & Preprocessing] --> A1[Input validation<br/>validation.py]
-    A --> A2[Boundary handling<br/>boundary_handler.py]
     A --> A3[Data augmentation & normalization]
     
     A1 --> B[Strategy Selection & Initialization]
-    A2 --> B
     A3 --> B
     
     B --> B1[Data characteristics analysis<br/>strategy_manager.py]

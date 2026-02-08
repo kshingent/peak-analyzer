@@ -24,6 +24,10 @@ class Connectivity:
         candidates = np.asarray(center) + self.offsets
         valid = np.all((candidates >= 0) & (candidates < shape), axis=1)
         return candidates[valid]
+    
+    def get_neighbor_offsets(self) -> np.ndarray:
+        """Return the neighbor offset vectors."""
+        return self.offsets
 
     @property
     def neighbor_count(self) -> int:

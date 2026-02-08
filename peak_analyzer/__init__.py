@@ -32,11 +32,9 @@ from .features import (
 # Connectivity components
 from .connectivity import (
     Connectivity,
-    compute_neighbors,
-    compute_neighbors_bulk,
-    NeighborExplorer,
-    PathFinder,
-    DistanceMetric
+    # Core neighbor functions
+    get_neighbors,
+    get_iterator,
 )
 
 # Coordinate system components
@@ -49,9 +47,6 @@ from .coordinate_system import (
 # Data management
 from .data import (
     validate_peak_data,
-    load_data,
-    save_data,
-    DataFormat,
     ValidationLevel
 )
 
@@ -85,13 +80,10 @@ __all__ = [
     "MorphologicalCalculator",
     "DistanceCalculator",
     
-    # Connectivity
+    # Connectivity (optimized)
     "Connectivity",
-    "compute_neighbors",
-    "compute_neighbors_bulk", 
-    "NeighborExplorer",
-    "PathFinder",
-    "DistanceMetric",
+    "get_neighbors",
+    "get_iterator",
     
     # Coordinate system
     "CoordinateMapping",
@@ -100,9 +92,6 @@ __all__ = [
     
     # Data management
     "validate_peak_data",
-    "load_data",
-    "save_data",
-    "DataFormat",
     "ValidationLevel",
     
     # Utilities
@@ -213,7 +202,7 @@ def analyze_peaks_comprehensive(data, coordinate_mapping=None,
             
             results['connectivity'] = {}
             for i, peak in enumerate(peaks):
-                neighbors = list(compute_neighbors(peak.indices, data.shape, offsets))
+                neighbors = list(get_neighbors(peak.indices, data.shape, offsets))
                 results['connectivity'][i] = {
                     'neighbors': neighbors,
                     'neighbor_count': len(neighbors)

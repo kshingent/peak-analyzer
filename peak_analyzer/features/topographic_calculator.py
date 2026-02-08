@@ -10,7 +10,6 @@ import numpy as np
 
 from .base_calculator import BaseCalculator
 from peak_analyzer.models import Peak
-from peak_analyzer.connectivity.distance_metrics import MinkowskiDistance
 
 
 class TopographicCalculator(BaseCalculator):
@@ -34,7 +33,28 @@ class TopographicCalculator(BaseCalculator):
         """
         super().__init__(scale)
         self.minkowski_p = minkowski_p
-        self._distance_calculator = MinkowskiDistance(p=minkowski_p, scale=scale)
+    
+    def _calculate_minkowski_distance(self, pos1: tuple, pos2: tuple, scale: list[float | None] = None) -> float:
+        """Calculate Minkowski distance between two positions."""
+        pos1_arr = np.array(pos1, dtype=float)
+        pos2_arr = np.array(pos2, dtype=float)
+        
+        # Apply scale if available
+        if scale is not None:
+            scale_arr = np.array(scale)
+            pos1_arr *= scale_arr
+            pos2_arr *= scale_arr
+        elif self.scale is not None:
+            scale_arr = np.array(self.scale)
+            pos1_arr *= scale_arr
+            pos2_arr *= scale_arr
+        
+        # Calculate Minkowski distance
+        diff = np.abs(pos1_arr - pos2_arr)
+        if np.isinf(self.minkowski_p):
+            return float(np.max(diff))  # Chebyshev distance
+        else:
+            return float(np.power(np.sum(np.power(diff, self.minkowski_p)), 1.0 / self.minkowski_p))
     
     def calculate_features(self, peaks: list[Peak], data: np.ndarray, **kwargs) -> dict[Peak, dict[str, Any]]:
         """
@@ -184,7 +204,7 @@ class TopographicCalculator(BaseCalculator):
             
             if other_peak.height >= peak_height:
                 other_center = self.calculate_centroid(other_peak.plateau_indices)
-                distance = self._distance_calculator.calculate_distance(
+                distance = self._calculate_minkowski_distance(
                     peak_center, other_center, self.get_effective_scale(data.ndim)
                 )
                 min_distance = min(min_distance, distance)
