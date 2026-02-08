@@ -1,3 +1,8 @@
+# Status: Work in Progress (WIP)
+# Status: Work in Progress (WIP)
+
+This project is currently a prototype under development. Algorithm implementations and refactoring are ongoing, and the structure may undergo significant changes.
+
 # peak-analyzer
 
 ## Core Algorithm: Topography-Aware Multidimensional Peak Detection
