@@ -161,14 +161,14 @@ class ParameterValidator:
         Raises:
         -------
         ValueError
-            If p is not valid
-        """
+            If p is not a positive number or is invalid for Minkowski distance
+    """
         if not isinstance(p, (int, float)):
-            raise TypeError(f"Minkowski p parameter must be a number, got {type(p)}")
-            
+            raise TypeError(f"p must be a number, got {type(p)}")
+    
         if p <= 0:
-            raise ValueError("Minkowski p parameter must be positive")
-            
+            raise ValueError("p must be positive for Minkowski distance")
+    
         return float(p)
     
     def validate_filter_criteria(self, criteria: dict[str, Any]) -> dict[str, Any]:
