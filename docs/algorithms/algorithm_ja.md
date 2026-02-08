@@ -217,7 +217,10 @@ PeakAnalyzerは階層化されたモジュラー設計を採用し、地形学�
 peak_analyzer/
 ├── peak_analyzer/                    # メインパッケージ
 │   ├── __init__.py                   # パッケージエントリポイント
-│   ├── models.py                    # 中央データ構造定義
+│   ├── models/                      # 中央データ構造定義
+│   │   ├── __init__.py              # パッケージエントリーポイント
+│   │   ├── peaks.py                 # ピーク検出結果構造
+│   │   └── data_analysis.py         # 分析メタデータ構造
 │   ├── api/                         # ユーザーAPI層
 │   │   ├── peak_detector.py         # メイン分析クラス
 │   │   ├── result_dataframe.py      # 結果データフレーム処理
@@ -304,7 +307,9 @@ peak_analyzer/
 #### 1. **api/** - ユーザーAPI層
 地形学的ピーク分析のための統一インターフェースを提供
 
-**models.py**: 中央データ構造定義
+**models/**: 中央データ構造定義
+- **peaks.py**: ピーク検出結果構造（Peak、VirtualPeak、SaddlePoint）
+- **data_analysis.py**: 分析メタデータ構造（DataCharacteristics、BenchmarkResults）
 ```python
 @dataclass
 class Peak:
@@ -330,7 +335,7 @@ class SaddlePoint:
 class PeakAnalyzer:
     def __init__(self, strategy='auto', connectivity=1, 
                  boundary='infinite_height', scale=None, 
-                 distance_metric='euclidean', **kwargs)
+                 minkowski_p=2.0, **kwargs)
     def find_peaks(self, data, **filters) -> PeakCollection
     def analyze_prominence(self, peaks, wlen=None) -> ProminenceResults
     def calculate_features(self, peaks, features='all') -> FeatureDataFrame
@@ -444,7 +449,7 @@ class GeometricCalculator(BaseCalculator):
 **topographic_calculator.py**: 地形学的特徴
 ```python
 class TopographicCalculator(BaseCalculator):
-    def calculate_isolation(self, peak, all_peaks, distance_metric) -> float
+    def calculate_isolation(self, peak, all_peaks, minkowski_p) -> float
     def calculate_relative_height(self, peak, data, neighborhood_radius) -> float
     def calculate_topographic_position_index(self, peak, data) -> float
     def calculate_width_at_relative_height(self, peak, data, rel_height) -> float
@@ -471,7 +476,7 @@ class GridManager:
     def __init__(self, mapping: CoordinateMapping, connectivity_level: int)
     def indices_to_coordinates(self, indices) -> Union[Tuple, np.ndarray]
     def coordinates_to_indices(self, coordinates) -> Union[Tuple, np.ndarray]
-    def calculate_distance(self, coord1, coord2, metric='euclidean') -> float
+    def calculate_distance(self, coord1, coord2, p=2.0) -> float
     def get_neighbors_coordinates(self, center_coordinates) -> List[Tuple]
     def find_neighbors_in_radius(self, center, radius, metric) -> List[Tuple]
 

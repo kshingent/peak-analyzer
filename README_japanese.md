@@ -87,7 +87,7 @@ print(features_df[['coordinates', 'height', 'prominence', 'area']])
 # 実世界座標の設定
 analyzer = PeakAnalyzer(
     scale=[1.0, 0.5],  # 異なるx/y解像度
-    distance_metric='euclidean'
+    minkowski_p=2.0    # ユークリッド距離
 )
 
 # 特徴計算を伴うピーク検出

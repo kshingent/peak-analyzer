@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 from enum import Enum
 
-from ..coordinate_system import GridManager
+from peak_analyzer.coordinate_system import GridManager
 from .boundary_conditions import BoundaryManager
 
 

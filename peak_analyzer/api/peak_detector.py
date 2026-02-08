@@ -6,11 +6,11 @@ Provides the primary interface for topographic peak detection and analysis.
 
 import numpy as np
 
-from ..core.strategy_manager import StrategyManager
-from ..coordinate_system.grid_manager import GridManager
-from ..coordinate_system.coordinate_mapping import CoordinateMapping
-from ..boundary.boundary_conditions import BoundaryManager
-from ..data.validation import validate_peak_data
+from peak_analyzer.core.strategy_manager import StrategyManager
+from peak_analyzer.coordinate_system.grid_manager import GridManager
+from peak_analyzer.coordinate_system.coordinate_mapping import CoordinateMapping
+from peak_analyzer.boundary.boundary_conditions import BoundaryManager
+from peak_analyzer.data.validation import validate_peak_data
 from .result_dataframe import PeakCollection
 from .parameter_validation import ParameterValidator
 
@@ -29,7 +29,7 @@ class PeakAnalyzer:
         connectivity: int = 1, 
         boundary: str = 'infinite_height',
         scale: float | list[float | None] = None,
-        distance_metric: str = 'euclidean',
+        minkowski_p: float = 2.0,
         **kwargs
     ):
         """
@@ -45,8 +45,8 @@ class PeakAnalyzer:
             Boundary condition ('infinite_height', 'infinite_depth', 'periodic', 'custom')
         scale : float or list of float
             Physical scale for each dimension (real-world units per pixel)
-        distance_metric : str
-            Distance metric for calculations ('euclidean', 'manhattan', 'chebyshev', 'minkowski')
+        minkowski_p : float
+            Minkowski distance parameter (p=1: Manhattan, p=2: Euclidean, p=∞: Chebyshev)
         **kwargs
             Additional strategy-specific parameters
         """
@@ -54,7 +54,7 @@ class PeakAnalyzer:
         self.connectivity = connectivity
         self.boundary_type = boundary
         self.scale = scale
-        self.distance_metric = distance_metric
+        self.minkowski_p = minkowski_p
         self.kwargs = kwargs
         
         # Initialize components
@@ -107,7 +107,7 @@ class PeakAnalyzer:
         self.grid_manager = GridManager(coordinate_mapping, self.connectivity)
         
         # Set up boundary handling - needs data shape, so initialize here
-        from ..boundary.boundary_conditions import NoBoundary, ConstantBoundary
+        from peak_analyzer.boundary.boundary_conditions import NoBoundary, ConstantBoundary
         if self.boundary_type == 'infinite_height':
             boundary_condition = ConstantBoundary(value=float('inf'))
         elif self.boundary_type == 'infinite_depth':  

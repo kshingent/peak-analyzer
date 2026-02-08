@@ -15,7 +15,6 @@ class ParameterValidator:
     
     VALID_STRATEGIES = {'auto', 'union_find', 'plateau_first', 'hybrid'}
     VALID_BOUNDARY_TYPES = {'infinite_height', 'infinite_depth', 'periodic', 'custom'}
-    VALID_DISTANCE_METRICS = {'euclidean', 'manhattan', 'chebyshev', 'minkowski'}
     
     def __init__(self):
         """Initialize parameter validator."""
@@ -145,42 +144,32 @@ class ParameterValidator:
             
         raise TypeError(f"Scale must be number, list, or None, got {type(scale)}")
     
-    def validate_distance_metric(self, metric: str, p_value: float | None = None) -> str:
+    def validate_minkowski_p(self, p: float) -> float:
         """
-        Validate distance metric parameter.
+        Validate Minkowski distance parameter p.
         
         Parameters:
         -----------
-        metric : str
-            Distance metric name
-        p_value : float, optional
-            Parameter for Minkowski distance
+        p : float
+            Minkowski distance order (p=1: Manhattan, p=2: Euclidean, p=∞: Chebyshev)
             
         Returns:
         --------
-        str
-            Validated metric name
+        float
+            Validated p value
             
         Raises:
         -------
         ValueError
-            If metric is not valid
+            If p is not valid
         """
-        if not isinstance(metric, str):
-            raise TypeError(f"Distance metric must be a string, got {type(metric)}")
+        if not isinstance(p, (int, float)):
+            raise TypeError(f"Minkowski p parameter must be a number, got {type(p)}")
             
-        metric = metric.lower()
-        if metric not in self.VALID_DISTANCE_METRICS:
-            raise ValueError(
-                f"Invalid distance metric '{metric}'. "
-                f"Valid options: {', '.join(self.VALID_DISTANCE_METRICS)}"
-            )
+        if p <= 0:
+            raise ValueError("Minkowski p parameter must be positive")
             
-        if metric == 'minkowski' and p_value is not None:
-            if p_value <= 0:
-                raise ValueError("Minkowski p-value must be positive")
-                
-        return metric
+        return float(p)
     
     def validate_filter_criteria(self, criteria: dict[str, Any]) -> dict[str, Any]:
         """

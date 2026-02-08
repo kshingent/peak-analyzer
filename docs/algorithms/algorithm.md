@@ -203,7 +203,10 @@ PeakAnalyzer employs a layered, modular architecture that provides a comprehensi
 peak_analyzer/
 ├── peak_analyzer/                    # Main package
 │   ├── __init__.py                   # Package entry point
-│   ├── models.py                    # Central data structure definitions
+│   ├── models/                      # Central data structure definitions
+│   │   ├── __init__.py              # Package entry point
+│   │   ├── peaks.py                 # Peak detection results
+│   │   └── data_analysis.py         # Analysis metadata structures
 │   ├── api/                         # User API Layer
 │   │   ├── peak_detector.py         # Main analysis class
 │   │   ├── result_dataframe.py      # Result dataframe processing
@@ -290,7 +293,9 @@ peak_analyzer/
 #### 1. **api/** - User API Layer
 Provides unified interface for topographic peak analysis
 
-**models.py**: Central data structure definitions
+**models/**: Central data structure definitions
+- **peaks.py**: Peak detection result structures (Peak, VirtualPeak, SaddlePoint)
+- **data_analysis.py**: Analysis metadata structures (DataCharacteristics, BenchmarkResults)
 ```python
 @dataclass
 class Peak:
@@ -316,7 +321,7 @@ class SaddlePoint:
 class PeakAnalyzer:
     def __init__(self, strategy='auto', connectivity=1, 
                  boundary='infinite_height', scale=None, 
-                 distance_metric='euclidean', **kwargs)
+                 minkowski_p=2.0, **kwargs)
     def find_peaks(self, data, **filters) -> PeakCollection
     def analyze_prominence(self, peaks, wlen=None) -> ProminenceResults
     def calculate_features(self, peaks, features='all') -> FeatureDataFrame
@@ -430,7 +435,7 @@ class GeometricCalculator(BaseCalculator):
 **topographic_calculator.py**: Topographic features
 ```python
 class TopographicCalculator(BaseCalculator):
-    def calculate_isolation(self, peak, all_peaks, distance_metric) -> float
+    def calculate_isolation(self, peak, all_peaks, minkowski_p) -> float
     def calculate_relative_height(self, peak, data, neighborhood_radius) -> float
     def calculate_topographic_position_index(self, peak, data) -> float
     def calculate_width_at_relative_height(self, peak, data, rel_height) -> float
@@ -457,7 +462,7 @@ class GridManager:
     def __init__(self, mapping: CoordinateMapping, connectivity_level: int)
     def indices_to_coordinates(self, indices) -> Union[Tuple, np.ndarray]
     def coordinates_to_indices(self, coordinates) -> Union[Tuple, np.ndarray]
-    def calculate_distance(self, coord1, coord2, metric='euclidean') -> float
+    def calculate_distance(self, coord1, coord2, p=2.0) -> float
     def get_neighbors_coordinates(self, center_coordinates) -> List[Tuple]
     def find_neighbors_in_radius(self, center, radius, metric) -> List[Tuple]
 

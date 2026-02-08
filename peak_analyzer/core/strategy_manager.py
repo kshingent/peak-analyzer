@@ -5,34 +5,12 @@ Handles automatic selection of optimal peak detection strategies based on data c
 """
 
 import numpy as np
-from dataclasses import dataclass
 
-from ..strategies.base_strategy import BaseStrategy
-from ..strategies.union_find_strategy import UnionFindStrategy
-from ..strategies.plateau_first_strategy import PlateauFirstStrategy
-from ..strategies.hybrid_strategy import HybridStrategy
-
-
-@dataclass
-class DataCharacteristics:
-    """Characteristics of input data for strategy selection."""
-    shape: tuple[int, ...]
-    ndim: int
-    data_type: str
-    value_range: tuple[float, float]
-    plateau_ratio: float
-    noise_level: float
-    peak_density_estimate: float
-
-
-@dataclass
-class BenchmarkResults:
-    """Results from strategy benchmarking."""
-    strategy_name: str
-    execution_time: float
-    memory_usage: float
-    peaks_detected: int
-    quality_metrics: dict[str, float]
+from peak_analyzer.models import DataCharacteristics, BenchmarkResults
+from peak_analyzer.strategies.base_strategy import BaseStrategy
+from peak_analyzer.strategies.union_find_strategy import UnionFindStrategy
+from peak_analyzer.strategies.plateau_first_strategy import PlateauFirstStrategy
+from peak_analyzer.strategies.hybrid_strategy import HybridStrategy
 
 
 class StrategyManager:

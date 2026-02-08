@@ -220,7 +220,7 @@ class AStarFinder(PathFinder):
     A* algorithm pathfinder with heuristic optimization.
     """
     
-    def __init__(self, connectivity: Connectivity, heuristic: str = 'euclidean'):
+    def __init__(self, connectivity: Connectivity, heuristic_p: float = 2.0):
         """
         Initialize A* finder.
         
@@ -228,11 +228,11 @@ class AStarFinder(PathFinder):
         -----------
         connectivity : ConnectivityPattern
             Connectivity pattern
-        heuristic : str
-            Heuristic function ('euclidean', 'manhattan', 'chebyshev')
+        heuristic_p : float
+            Heuristic Minkowski distance parameter (p=1: Manhattan, p=2: Euclidean, p=∞: Chebyshev)
         """
         super().__init__(connectivity)
-        self.heuristic_name = heuristic
+        self.heuristic_p = heuristic_p
     
     def find_path(self, start: tuple[int, ...], goal: tuple[int, ...], 
                  shape: tuple[int, ...], **kwargs) -> list[tuple[int, ...]] | None:
@@ -296,16 +296,13 @@ class AStarFinder(PathFinder):
     def _heuristic(self, pos1: tuple[int, ...], pos2: tuple[int, ...], scale: list[float]) -> float:
         """Calculate heuristic distance between positions."""
         diff = np.array(pos2) - np.array(pos1)
-        scaled_diff = diff * scale
+        scaled_diff = np.abs(diff * scale)
         
-        if self.heuristic_name == 'euclidean':
-            return float(np.linalg.norm(scaled_diff))
-        elif self.heuristic_name == 'manhattan':
-            return float(np.sum(np.abs(scaled_diff)))
-        elif self.heuristic_name == 'chebyshev':
-            return float(np.max(np.abs(scaled_diff)))
+        if np.isinf(self.heuristic_p):
+            # Chebyshev distance
+            return float(np.max(scaled_diff))
         else:
-            return float(np.linalg.norm(scaled_diff))  # Default to euclidean
+            return float(np.power(np.sum(np.power(scaled_diff, self.heuristic_p)), 1.0 / self.heuristic_p))
     
     def _reconstruct_path(self, parent: Dict, start: tuple[int, ...], goal: tuple[int, ...]) -> list[tuple[int, ...]]:
         """Reconstruct path from parent pointers."""
@@ -639,8 +636,8 @@ class PathFinderFactory:
         elif algorithm == 'dijkstra':
             return DijkstraFinder(connectivity)
         elif algorithm == 'astar':
-            heuristic = kwargs.get('heuristic', 'euclidean')
-            return AStarFinder(connectivity, heuristic)
+            heuristic_p = kwargs.get('heuristic_p', 2.0)
+            return AStarFinder(connectivity, heuristic_p)
         elif algorithm == 'topographic':
             return TopographicPathFinder(connectivity)
         else:

@@ -5,7 +5,7 @@ Efficient algorithms for generating neighbor indices in N-dimensional spaces
 with support for various connectivity patterns and boundary conditions.
 """
 
-from typing import Any, Iterator
+from typing import Any, Iterator, Callable
 import numpy as np
 from collections import deque
 from abc import ABC, abstractmethod
@@ -333,7 +333,7 @@ class IterativeNeighborGenerator:
     
     def bfs_neighbors(self, start: tuple[int, ...], shape: tuple[int, ...], 
                      max_distance: int = float('inf'),
-                     condition: callable | None = None) -> Iterator[tuple[tuple[int, ...], int]]:
+                     condition: Callable | None = None) -> Iterator[tuple[tuple[int, ...], int]]:
         """
         Generate neighbors using breadth-first search.
         
@@ -345,7 +345,7 @@ class IterativeNeighborGenerator:
             Array shape bounds
         max_distance : int
             Maximum search distance
-        condition : callable, optional
+        condition : Callable, optional
             Function to filter positions: condition(position) -> bool
             
         Yields:
@@ -378,7 +378,7 @@ class IterativeNeighborGenerator:
     
     def dfs_neighbors(self, start: tuple[int, ...], shape: tuple[int, ...],
                      max_depth: int = float('inf'),
-                     condition: callable | None = None) -> Iterator[tuple[tuple[int, ...], int]]:
+                     condition: Callable | None = None) -> Iterator[tuple[tuple[int, ...], int]]:
         """
         Generate neighbors using depth-first search.
         
@@ -390,7 +390,7 @@ class IterativeNeighborGenerator:
             Array shape bounds
         max_depth : int
             Maximum search depth
-        condition : callable, optional
+        condition : Callable, optional
             Function to filter positions
             
         Yields:

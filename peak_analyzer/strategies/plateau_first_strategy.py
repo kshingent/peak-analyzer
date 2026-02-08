@@ -10,10 +10,10 @@ import numpy as np
 from scipy.ndimage import maximum_filter, binary_dilation, label
 
 from .base_strategy import BaseStrategy, StrategyConfig
-from ..models import Peak
-from ..core.plateau_detector import PlateauDetector, PlateauRegion
-from ..core.prominence_calculator import ProminenceCalculator
-from ..connectivity.connectivity_types import Connectivity
+from peak_analyzer.models import Peak
+from peak_analyzer.core.plateau_detector import PlateauDetector, PlateauRegion
+from peak_analyzer.core.prominence_calculator import ProminenceCalculator
+from peak_analyzer.connectivity.connectivity_types import Connectivity
 
 
 class PlateauFirstStrategy(BaseStrategy):

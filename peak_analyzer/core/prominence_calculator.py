@@ -9,8 +9,8 @@ import numpy as np
 from dataclasses import dataclass
 import heapq
 
-from ..models import Peak
-from ..connectivity.path_finder import PathFinder
+from peak_analyzer.models import Peak
+from peak_analyzer.connectivity.path_finder import PathFinder
 
 
 @dataclass

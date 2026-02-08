@@ -11,8 +11,7 @@ import numpy as np
 from .base_strategy import BaseStrategy, StrategyConfig
 from .union_find_strategy import UnionFindStrategy
 from .plateau_first_strategy import PlateauFirstStrategy
-from ..models import Peak
-from ..core.strategy_manager import DataCharacteristics
+from peak_analyzer.models import Peak, DataCharacteristics
 
 
 class HybridStrategy(BaseStrategy):

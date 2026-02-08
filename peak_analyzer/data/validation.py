@@ -10,7 +10,7 @@ import numpy as np
 from enum import Enum
 from abc import ABC, abstractmethod
 
-from ..coordinate_system import CoordinateMapping, GridManager
+from peak_analyzer.coordinate_system import CoordinateMapping, GridManager
 
 
 class ValidationLevel(Enum):

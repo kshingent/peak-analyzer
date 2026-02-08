@@ -11,9 +11,9 @@ from collections import defaultdict, deque
 from dataclasses import dataclass
 
 from .base_strategy import BaseStrategy, StrategyConfig
-from ..models import Peak
-from ..core.union_find import GridUnionFind
-from ..connectivity.connectivity_types import Connectivity
+from peak_analyzer.models import Peak
+from peak_analyzer.core.union_find import GridUnionFind
+from peak_analyzer.connectivity.connectivity_types import Connectivity
 
 
 @dataclass

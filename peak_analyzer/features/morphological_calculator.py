@@ -13,7 +13,7 @@ from skimage.morphology import watershed, disk, ball
 from skimage.segmentation import find_boundaries
 
 from .base_calculator import BaseCalculator
-from ..models import Peak
+from peak_analyzer.models import Peak
 
 
 class MorphologicalCalculator(BaseCalculator):

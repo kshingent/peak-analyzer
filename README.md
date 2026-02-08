@@ -88,7 +88,7 @@ print(features_df[['coordinates', 'height', 'prominence', 'area']])
 # Configure real-world coordinates
 analyzer = PeakAnalyzer(
     scale=[1.0, 0.5],  # Different x/y resolution
-    distance_metric='euclidean'
+    minkowski_p=2.0    # Euclidean distance
 )
 
 # Find peaks with feature calculation

@@ -11,8 +11,8 @@ from scipy.spatial.distance import cdist, squareform
 from scipy.cluster.hierarchy import linkage, fcluster
 
 from .base_calculator import BaseCalculator
-from ..models import Peak
-from ..connectivity.distance_metrics import MinkowskiDistance
+from peak_analyzer.models import Peak
+from peak_analyzer.connectivity.distance_metrics import MinkowskiDistance
 
 
 class DistanceCalculator(BaseCalculator):
@@ -23,7 +23,7 @@ class DistanceCalculator(BaseCalculator):
     characteristics of peaks in the dataset.
     """
     
-    def __init__(self, scale: list[float | None] = None, distance_metric: str = 'euclidean'):
+    def __init__(self, scale: list[float | None] = None, minkowski_p: float = 2.0):
         """
         Initialize distance calculator.
         
@@ -31,12 +31,12 @@ class DistanceCalculator(BaseCalculator):
         -----------
         scale : list of float, optional
             Physical scale for each dimension
-        distance_metric : str
-            Distance metric to use ('euclidean', 'manhattan', 'minkowski')
+        minkowski_p : float
+            Minkowski distance parameter (p=1: Manhattan, p=2: Euclidean, p=∞: Chebyshev)
         """
         super().__init__(scale)
-        self.distance_metric = distance_metric
-        self._distance_calculator = MinkowskiDistance()
+        self.minkowski_p = minkowski_p
+        self._distance_calculator = MinkowskiDistance(p=minkowski_p, scale=scale)
     
     def calculate_features(self, peaks: list[Peak], data: np.ndarray, **kwargs) -> dict[Peak, dict[str, Any]]:
         """
@@ -479,14 +479,17 @@ class DistanceCalculator(BaseCalculator):
         # Scale positions
         scaled_positions = positions_array * scale
         
-        # Calculate pairwise distances
-        if self.distance_metric == 'euclidean':
-            distance_matrix = cdist(scaled_positions, scaled_positions, 'euclidean')
-        elif self.distance_metric == 'manhattan':
-            distance_matrix = cdist(scaled_positions, scaled_positions, 'cityblock')
-        else:
-            # Default to euclidean
-            distance_matrix = cdist(scaled_positions, scaled_positions, 'euclidean')
+        # Calculate pairwise distances using MinkowskiDistance calculator
+        n_peaks = len(scaled_positions)
+        distance_matrix = np.zeros((n_peaks, n_peaks))
+        
+        for i in range(n_peaks):
+            for j in range(i + 1, n_peaks):
+                dist = self._distance_calculator.calculate_distance(
+                    tuple(scaled_positions[i]), tuple(scaled_positions[j])
+                )
+                distance_matrix[i, j] = dist
+                distance_matrix[j, i] = dist
         
         return distance_matrix
     

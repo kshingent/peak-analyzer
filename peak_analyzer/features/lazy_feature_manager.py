@@ -15,7 +15,7 @@ from .geometric_calculator import GeometricCalculator
 from .topographic_calculator import TopographicCalculator
 from .morphological_calculator import MorphologicalCalculator
 from .distance_calculator import DistanceCalculator
-from ..models import Peak
+from peak_analyzer.models import Peak
 
 
 class LazyFeatureManager:

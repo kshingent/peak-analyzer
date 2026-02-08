@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 import numpy as np
 
-from ..models import Peak
+from peak_analyzer.models import Peak
 
 
 class BaseCalculator(ABC):

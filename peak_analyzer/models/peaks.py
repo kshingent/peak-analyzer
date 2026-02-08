@@ -1,8 +1,8 @@
 """
-Core data models for peak analysis.
+Peak Detection Result Models
 
-This module contains the essential data structures used throughout the peak analyzer.
-Pure data classes with no business logic or external dependencies.
+Data structures representing detected peaks, virtual peaks, and saddle points.
+These are the primary output structures of the peak detection algorithms.
 """
 
 from dataclasses import dataclass, field
@@ -16,7 +16,7 @@ IndexTuple = tuple[int, ...]          # Index space coordinates (ijk...)
 CoordTuple = tuple[float, ...]        # Coordinate space coordinates (xyz...)
 
 # =============================================================================
-# Core Data Structures
+# Peak Detection Results
 # =============================================================================
 
 @dataclass

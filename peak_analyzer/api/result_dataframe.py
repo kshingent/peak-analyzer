@@ -8,9 +8,9 @@ import pandas as pd
 import numpy as np
 from typing import Any
 
-from ..models import Peak, VirtualPeak
-from ..coordinate_system.grid_manager import GridManager
-from ..features.lazy_feature_manager import LazyFeatureManager
+from peak_analyzer.models import Peak, VirtualPeak
+from peak_analyzer.coordinate_system.grid_manager import GridManager
+from peak_analyzer.features.lazy_feature_manager import LazyFeatureManager
 
 
 class PeakCollection:

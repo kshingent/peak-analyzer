@@ -9,8 +9,8 @@ from typing import Any
 import numpy as np
 
 from .base_calculator import BaseCalculator
-from ..models import Peak
-from ..connectivity.distance_metrics import MinkowskiDistance
+from peak_analyzer.models import Peak
+from peak_analyzer.connectivity.distance_metrics import MinkowskiDistance
 
 
 class TopographicCalculator(BaseCalculator):
@@ -21,7 +21,7 @@ class TopographicCalculator(BaseCalculator):
     relative height calculations, gradient analysis, and morphological features.
     """
     
-    def __init__(self, scale: list[float | None] = None, distance_metric: str = 'euclidean'):
+    def __init__(self, scale: list[float | None] = None, minkowski_p: float = 2.0):
         """
         Initialize topographic calculator.
         
@@ -29,12 +29,12 @@ class TopographicCalculator(BaseCalculator):
         -----------
         scale : list of float, optional
             Physical scale for each dimension
-        distance_metric : str
-            Distance metric for isolation calculations
+        minkowski_p : float
+            Minkowski distance parameter for isolation calculations
         """
         super().__init__(scale)
-        self.distance_metric = distance_metric
-        self._distance_calculator = MinkowskiDistance()
+        self.minkowski_p = minkowski_p
+        self._distance_calculator = MinkowskiDistance(p=minkowski_p, scale=scale)
     
     def calculate_features(self, peaks: list[Peak], data: np.ndarray, **kwargs) -> dict[Peak, dict[str, Any]]:
         """
