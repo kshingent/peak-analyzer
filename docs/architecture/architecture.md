@@ -6,36 +6,24 @@ _← [Back to Algorithm](../algorithms/algorithm.md) | [日本語版](architectu
 
 PeakAnalyzer employs a layered, modular architecture that provides a comprehensive framework for topographic peak detection. Each layer has clearly separated responsibilities, ensuring extensibility and maintainability.
 
-```
-              User API Layer
-┌─────────────────────────────────────────┐
-│           PeakAnalyzer                  │  <- Main Interface
-│        (peak_detector.py)               │
-└─────────────┬───────────────────────────┘
-              │
-           Core Control Layer
-┌─────────────┴───────────────────────────┐
-│      StrategySelector & Manager         │  <- Algorithm Selection & Coordination
-│    (strategy_selector.py)               │
-└─────────────┬───────────────────────────┘
-              │
-          Algorithm Layer
-┌─────────────┴───────────────────────────┐
-│  UnionFindStrategy  │  PlateauFirst     │  <- Detection Strategy Implementation
-│                     │  Strategy         │
-└─────────────┬───────┴───────────────────┘
-              │
-           Feature Computation Layer
-┌─────────────┴───────────────────────────┐
-│  Geometric   │ Topographic │ Distance  │  <- Topographic Feature Calculation
-│  Features    │ Features    │ Features   │
-└─────────────┬───────────────────────────┘
-              │
-          Foundation Services Layer
-┌─────────────┴───────────────────────────┐
-│ Connectivity │ Boundary │ Validation   │  <- Core Functions & Utilities
-│ & Neighbors  │ Handling │ & Memory     │
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["User API Layer<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["Core Control Layer<br/>StrategySelector & Manager<br/>(strategy_selector.py)"]
+    B --> C["Algorithm Layer<br/>UnionFindStrategy | PlateauFirst Strategy"]
+    C --> D["Feature Computation Layer<br/>Geometric Features | Topographic Features | Distance Features"]
+    D --> E["Foundation Services Layer<br/>Connectivity & Neighbors | Boundary Handling | Validation & Memory"]
+    
+    classDef apiLayer fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef coreLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef algorithmLayer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef featureLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef foundationLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A apiLayer
+    class B coreLayer
+    class C algorithmLayer
+    class D featureLayer
+    class E foundationLayer
 ```
 
 ## Directory Structure and Responsibility Separation
@@ -181,32 +169,57 @@ Efficient data processing and memory management
 
 ## Data Flow and Interactions
 
-```
-1. Data Input & Preprocessing
-   ├── Input validation (validation.py)
-   ├── Boundary handling (boundary_handler.py)
-   └── Data augmentation & normalization
-
-2. Strategy Selection & Initialization
-   ├── Data characteristics analysis (strategy_manager.py)
-   ├── Optimal strategy selection
-   └── Parameter tuning
-
-3. Peak Detection Execution
-   ├── Union-Find strategy OR Plateau-first strategy
-   ├── Plateau detection & validation
-   ├── Prominence calculation
-   └── Virtual peak processing
-
-4. Feature Calculation & Filtering
-   ├── Lazy feature computation (lazy_feature_manager.py)
-   ├── User-specified filter application
-   └── Result data structure construction
-
-5. Result Output & Visualization
-   ├── DataFrame conversion
-   ├── Statistical information generation
-   └── Visualization & export
+```mermaid
+flowchart TD
+    A[Data Input & Preprocessing] --> A1[Input validation<br/>validation.py]
+    A --> A2[Boundary handling<br/>boundary_handler.py]
+    A --> A3[Data augmentation & normalization]
+    
+    A1 --> B[Strategy Selection & Initialization]
+    A2 --> B
+    A3 --> B
+    
+    B --> B1[Data characteristics analysis<br/>strategy_manager.py]
+    B --> B2[Optimal strategy selection]
+    B --> B3[Parameter tuning]
+    
+    B1 --> C[Peak Detection Execution]
+    B2 --> C
+    B3 --> C
+    
+    C --> C1[Union-Find strategy OR<br/>Plateau-first strategy]
+    C --> C2[Plateau detection & validation]
+    C --> C3[Prominence calculation]
+    C --> C4[Virtual peak processing]
+    
+    C1 --> D[Feature Calculation & Filtering]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    
+    D --> D1[Lazy feature computation<br/>lazy_feature_manager.py]
+    D --> D2[User-specified filter application]
+    D --> D3[Result data structure construction]
+    
+    D1 --> E[Result Output & Visualization]
+    D2 --> E
+    D3 --> E
+    
+    E --> E1[DataFrame conversion]
+    E --> E2[Statistical information generation]
+    E --> E3[Visualization & export]
+    
+    classDef inputPhase fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef strategyPhase fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef detectionPhase fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef featurePhase fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef outputPhase fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A,A1,A2,A3 inputPhase
+    class B,B1,B2,B3 strategyPhase
+    class C,C1,C2,C3,C4 detectionPhase
+    class D,D1,D2,D3 featurePhase
+    class E,E1,E2,E3 outputPhase
 ```
 
 ## Performance Optimization Features

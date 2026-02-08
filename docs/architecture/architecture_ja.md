@@ -6,36 +6,24 @@ _← [アルゴリズム](../algorithms/algorithm_ja.md) | [English Version](arc
 
 PeakAnalyzerは階層化されたモジュラーアーキテクチャを採用し、地形ピーク検出のための包括的なフレームワークを提供します。各レイヤーは明確に責任を分離し、拡張性と保守性を確保します。
 
-```
-              ユーザーAPIレイヤー
-┌─────────────────────────────────────────┐
-│           PeakAnalyzer                  │  <- メインインターフェース
-│        (peak_detector.py)               │
-└─────────────┬───────────────────────────┘
-              │
-           コア制御レイヤー
-┌─────────────┴───────────────────────────┐
-│      ストラテジー選択・管理               │  <- アルゴリズム選択・調整
-│    (strategy_selector.py)               │
-└─────────────┬───────────────────────────┘
-              │
-          アルゴリズムレイヤー
-┌─────────────┴───────────────────────────┐
-│  UnionFind戦略  │  プラトー優先           │  <- 検出戦略実装
-│                │  戦略                   │
-└─────────────┬───────┴───────────────────┘
-              │
-           特徴量計算レイヤー
-┌─────────────┴───────────────────────────┐
-│  幾何学的    │ 地形学的   │ 距離計算     │  <- 地形特徴量計算
-│  特徴量      │ 特徴量     │ 特徴量       │
-└─────────────┬───────────────────────────┘
-              │
-          基盤サービスレイヤー
-┌─────────────┴───────────────────────────┐
-│ 接続性と      │ 境界処理   │ 検証と       │  <- コア機能・ユーティリティ
-│ 近傍生成      │           │ メモリ管理    │
-└─────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["ユーザーAPIレイヤー<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["コア制御レイヤー<br/>ストラテジー選択・管理<br/>(strategy_selector.py)"]
+    B --> C["アルゴリズムレイヤー<br/>UnionFind戦略 | プラトー優先戦略"]
+    C --> D["特徴量計算レイヤー<br/>幾何学的特徴量 | 地形学的特徴量 | 距離計算特徴量"]
+    D --> E["基盤サービスレイヤー<br/>接続性と近傍生成 | 境界処理 | 検証とメモリ管理"]
+    
+    classDef apiLayer fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef coreLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef algorithmLayer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef featureLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef foundationLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A apiLayer
+    class B coreLayer
+    class C algorithmLayer
+    class D featureLayer
+    class E foundationLayer
 ```
 
 ## ディレクトリ構造と責任分離
@@ -181,32 +169,57 @@ N次元空間における接続性とパス探索
 
 ## データフローと相互作用
 
-```
-1. データ入力・前処理
-   ├── 入力検証 (validation.py)
-   ├── 境界処理 (boundary_handler.py)
-   └── データ拡張・正規化
-
-2. 戦略選択・初期化
-   ├── データ特性分析 (strategy_manager.py)
-   ├── 最適戦略選択
-   └── パラメータ調整
-
-3. ピーク検出実行
-   ├── Union-Find戦略 または プラトー優先戦略
-   ├── プラトー検出・検証
-   ├── プロミネンス計算
-   └── 仮想ピーク処理
-
-4. 特徴量計算・フィルタリング
-   ├── 遅延特徴量計算 (lazy_feature_manager.py)
-   ├── ユーザー指定フィルタ適用
-   └── 結果データ構造構築
-
-5. 結果出力・可視化
-   ├── データフレーム変換
-   ├── 統計情報生成
-   └── 可視化・エクスポート
+```mermaid
+flowchart TD
+    A[データ入力・前処理] --> A1[入力検証<br/>validation.py]
+    A --> A2[境界処理<br/>boundary_handler.py]
+    A --> A3[データ拡張・正規化]
+    
+    A1 --> B[戦略選択・初期化]
+    A2 --> B
+    A3 --> B
+    
+    B --> B1[データ特性分析<br/>strategy_manager.py]
+    B --> B2[最適戦略選択]
+    B --> B3[パラメータ調整]
+    
+    B1 --> C[ピーク検出実行]
+    B2 --> C
+    B3 --> C
+    
+    C --> C1[Union-Find戦略 または<br/>プラトー優先戦略]
+    C --> C2[プラトー検出・検証]
+    C --> C3[プロミネンス計算]
+    C --> C4[仮想ピーク処理]
+    
+    C1 --> D[特徴量計算・フィルタリング]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    
+    D --> D1[遅延特徴量計算<br/>lazy_feature_manager.py]
+    D --> D2[ユーザー指定フィルタ適用]
+    D --> D3[結果データ構造構築]
+    
+    D1 --> E[結果出力・可視化]
+    D2 --> E
+    D3 --> E
+    
+    E --> E1[データフレーム変換]
+    E --> E2[統計情報生成]
+    E --> E3[可視化・エクスポート]
+    
+    classDef inputPhase fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef strategyPhase fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef detectionPhase fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef featurePhase fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef outputPhase fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A,A1,A2,A3 inputPhase
+    class B,B1,B2,B3 strategyPhase
+    class C,C1,C2,C3,C4 detectionPhase
+    class D,D1,D2,D3 featurePhase
+    class E,E1,E2,E3 outputPhase
 ```
 
 ## パフォーマンス最適化機能
