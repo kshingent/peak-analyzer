@@ -11,7 +11,7 @@ from collections import deque
 import heapq
 from abc import ABC, abstractmethod
 
-from .connectivity_types import ConnectivityPattern
+from .connectivity_types import Connectivity
 from .neighbor_generator import VectorizedNeighborGenerator
 
 
@@ -20,13 +20,13 @@ class PathFinder(ABC):
     Abstract base class for pathfinding algorithms.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """
         Initialize path finder.
         
         Parameters:
         -----------
-        connectivity : ConnectivityPattern
+        connectivity : Connectivity
             Connectivity pattern for neighbor relationships
         """
         self.connectivity = connectivity
@@ -220,7 +220,7 @@ class AStarFinder(PathFinder):
     A* algorithm pathfinder with heuristic optimization.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern, heuristic: str = 'euclidean'):
+    def __init__(self, connectivity: Connectivity, heuristic: str = 'euclidean'):
         """
         Initialize A* finder.
         
@@ -425,7 +425,7 @@ class FloodFillFinder:
     Flood fill algorithm for region connectivity analysis.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize flood fill finder."""
         self.connectivity = connectivity
         self.neighbor_generator = VectorizedNeighborGenerator(connectivity)
@@ -510,7 +510,7 @@ class WatershedPathFinder:
     Watershed-based pathfinder for drainage analysis.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize watershed pathfinder."""
         self.connectivity = connectivity
         self.neighbor_generator = VectorizedNeighborGenerator(connectivity)
@@ -616,7 +616,7 @@ class PathFinderFactory:
     """
     
     @staticmethod
-    def create_pathfinder(algorithm: str, connectivity: ConnectivityPattern, **kwargs) -> PathFinder:
+    def create_pathfinder(algorithm: str, connectivity: Connectivity, **kwargs) -> PathFinder:
         """
         Create pathfinder instance.
         

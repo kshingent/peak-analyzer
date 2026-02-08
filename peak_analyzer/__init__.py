@@ -32,7 +32,7 @@ from .features import (
 
 # Connectivity components
 from .connectivity import (
-    ConnectivityPattern,
+    Connectivity,
     NeighborGenerator,
     PathFinder,
     DistanceMetric
@@ -93,7 +93,7 @@ __all__ = [
     "DistanceCalculator",
     
     # Connectivity
-    "ConnectivityPattern",
+    "Connectivity",
     "NeighborGenerator", 
     "PathFinder",
     "DistanceMetric",
@@ -217,8 +217,8 @@ def analyze_peaks_comprehensive(data, coordinate_mapping=None,
     # Add connectivity analysis if requested
     if include_connectivity and peaks:
         try:
-            # Analyze peak connectivity
-            pattern = ConnectivityPattern.from_data(data.shape)
+            # Analyze peak connectivity 
+            pattern = Connectivity(len(data.shape), len(data.shape))  # Full connectivity
             neighbor_gen = NeighborGenerator(pattern)
             
             results['connectivity'] = {}

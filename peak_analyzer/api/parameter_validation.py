@@ -14,7 +14,6 @@ class ParameterValidator:
     """
     
     VALID_STRATEGIES = {'auto', 'union_find', 'plateau_first', 'hybrid'}
-    VALID_CONNECTIVITY_TYPES = {'face', 'edge', 'vertex'}
     VALID_BOUNDARY_TYPES = {'infinite_height', 'infinite_depth', 'periodic', 'custom'}
     VALID_DISTANCE_METRICS = {'euclidean', 'manhattan', 'chebyshev', 'minkowski'}
     
@@ -52,18 +51,18 @@ class ParameterValidator:
             )
         return strategy
     
-    def validate_connectivity(self, connectivity: str | int) -> str | int:
+    def validate_connectivity(self, connectivity: int) -> int:
         """
         Validate connectivity parameter.
         
         Parameters:
         -----------
-        connectivity : str or int
-            Connectivity specification
+        connectivity : int
+            Integer k-connectivity value
             
         Returns:
         --------
-        str or int
+        int
             Validated connectivity
             
         Raises:
@@ -71,22 +70,9 @@ class ParameterValidator:
         ValueError
             If connectivity is not valid
         """
-        if isinstance(connectivity, str):
-            connectivity = connectivity.lower()
-            if connectivity not in self.VALID_CONNECTIVITY_TYPES:
-                raise ValueError(
-                    f"Invalid connectivity '{connectivity}'. "
-                    f"Valid options: {', '.join(self.VALID_CONNECTIVITY_TYPES)} or integer k-connectivity"
-                )
-            return connectivity
-        elif isinstance(connectivity, int):
-            if connectivity < 1:
-                raise ValueError("Connectivity level must be >= 1")
-            return connectivity
-        else:
-            raise TypeError(
-                f"Connectivity must be string or integer, got {type(connectivity)}"
-            )
+        if connectivity < 1:
+            raise ValueError("Connectivity level must be >= 1")
+        return connectivity
     
     def validate_boundary(self, boundary: str) -> str:
         """

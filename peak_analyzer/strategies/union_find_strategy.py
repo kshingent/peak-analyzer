@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from .base_strategy import BaseStrategy, StrategyConfig
 from ..models import Peak
 from ..core.union_find import GridUnionFind
-from ..connectivity.connectivity_types import get_k_connectivity
+from ..connectivity.connectivity_types import Connectivity
 
 
 @dataclass
@@ -212,7 +212,8 @@ class UnionFindStrategy(BaseStrategy):
         # Get connectivity structure
         if self.connectivity_structure is None:
             connectivity = self.config.connectivity
-            self.connectivity_structure = get_k_connectivity(data.ndim, connectivity)
+            conn = Connectivity(data.ndim, connectivity)
+            self.connectivity_structure = conn.structure
         
         # Generate neighbors for each point
         it = np.nditer(data, flags=['multi_index'])

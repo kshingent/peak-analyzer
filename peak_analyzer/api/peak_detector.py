@@ -26,7 +26,7 @@ class PeakAnalyzer:
     def __init__(
         self, 
         strategy: str = 'auto',
-        connectivity: str | int = 'face', 
+        connectivity: int = 1, 
         boundary: str = 'infinite_height',
         scale: float | list[float | None] = None,
         distance_metric: str = 'euclidean',
@@ -40,7 +40,7 @@ class PeakAnalyzer:
         strategy : str
             Detection strategy ('auto', 'union_find', 'plateau_first', 'hybrid')
         connectivity : str or int
-            Connectivity level ('face', 'edge', 'vertex') or integer k-connectivity
+            Integer k-connectivity (1 ≤ k ≤ ndim)
         boundary : str
             Boundary condition ('infinite_height', 'infinite_depth', 'periodic', 'custom')
         scale : float or list of float

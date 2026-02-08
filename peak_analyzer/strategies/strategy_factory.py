@@ -324,7 +324,7 @@ class StrategyFactory:
         if characteristics:
             # Adjust connectivity based on data dimensionality
             if len(data_shape) > 3:
-                config.connectivity = 'face'  # Conservative for high dimensions
+                config.connectivity = 1  # Conservative for high dimensions
             
             # Adjust noise handling
             noise_level = characteristics.get('noise_level', 0.0)

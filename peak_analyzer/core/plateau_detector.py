@@ -8,7 +8,7 @@ import numpy as np
 from dataclasses import dataclass
 from scipy.ndimage import maximum_filter, binary_dilation, label
 
-from ..connectivity.connectivity_types import get_k_connectivity
+from ..connectivity.connectivity_types import Connectivity
 
 
 @dataclass
@@ -28,7 +28,7 @@ class PlateauDetector:
     Detects and validates plateau regions using morphological operations.
     """
     
-    def __init__(self, connectivity: str | int = 'face'):
+    def __init__(self, connectivity: int = 1):
         """
         Initialize plateau detector.
         
@@ -57,7 +57,8 @@ class PlateauDetector:
             List of detected plateau regions
         """
         connectivity = connectivity or self.connectivity
-        self._connectivity_structure = get_k_connectivity(data.ndim, connectivity)
+        conn = Connectivity(data.ndim, connectivity)
+        self._connectivity_structure = conn.structure
         
         # Step 1: Apply local maximum filter
         local_maxima_mask = self._apply_local_maximum_filter(data)
@@ -103,8 +104,8 @@ class PlateauDetector:
             plateau_mask[idx] = True
             
         # Apply morphological dilation
-        structure = get_k_connectivity(data.ndim, connectivity)
-        dilated_mask = binary_dilation(plateau_mask, structure=structure)
+        conn = Connectivity(data.ndim, connectivity)
+        dilated_mask = binary_dilation(plateau_mask, structure=conn.structure)
         
         # Find boundary (dilated - original)
         boundary_mask = dilated_mask & (~plateau_mask)

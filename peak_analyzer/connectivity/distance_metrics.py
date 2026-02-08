@@ -10,7 +10,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from .connectivity_types import ConnectivityPattern
+from .connectivity_types import Connectivity
 
 
 class DistanceType(Enum):
@@ -315,7 +315,7 @@ class GeodesicDistance(DistanceMetric):
     Geodesic distance along surface paths.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern, 
+    def __init__(self, connectivity: Connectivity, 
                  pathfinder_algorithm: str = "dijkstra",
                  scale: list[float | None] = None):
         """
@@ -323,7 +323,7 @@ class GeodesicDistance(DistanceMetric):
         
         Parameters:
         -----------
-        connectivity : ConnectivityPattern
+        connectivity : Connectivity
             Connectivity for pathfinding
         pathfinder_algorithm : str
             Pathfinding algorithm to use

@@ -25,7 +25,7 @@ class VirtualPeakHandler:
     Handles detection and creation of virtual peaks for same-height connected peaks.
     """
     
-    def __init__(self, connectivity: str = 'face'):
+    def __init__(self, connectivity: int = 1):
         """
         Initialize virtual peak handler.
         

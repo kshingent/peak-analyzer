@@ -38,7 +38,7 @@ class ProminenceCalculator:
     Calculates prominence using height-priority terrain exploration.
     """
     
-    def __init__(self, connectivity: str | int = 'face'):
+    def __init__(self, connectivity: int = 1):
         """
         Initialize prominence calculator.
         

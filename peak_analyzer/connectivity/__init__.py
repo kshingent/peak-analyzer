@@ -6,7 +6,7 @@ and distance metrics for N-dimensional spatial analysis.
 
 Classes:
 --------
-ConnectivityPattern : Abstract base for connectivity patterns
+ConnectivityPattern : Abstract base for connectivity patterns -> Connectivity
 FaceConnectivity : Face connectivity (4-conn in 2D, 6-conn in 3D)
 EdgeConnectivity : Edge connectivity (8-conn in 2D, 18-conn in 3D)
 VertexConnectivity : Vertex connectivity (8-conn in 2D, 26-conn in 3D)
@@ -70,18 +70,7 @@ Usage:
     dist = distance_metric.calculate_distance((0, 0, 0), (10, 10, 5))
 """
 
-from .connectivity_types import (
-    ConnectivityType,
-    ConnectivityPattern,
-    FaceConnectivity,
-    EdgeConnectivity,
-    VertexConnectivity,
-    CustomConnectivity,
-    AdaptiveConnectivity,
-    ConnectivityFactory,
-    get_connectivity_info,
-    visualize_connectivity_2d
-)
+from .connectivity_types import Connectivity
 
 from .neighbor_generator import (
     NeighborGenerator,
@@ -124,16 +113,7 @@ from .distance_metrics import (
 
 __all__ = [
     # Connectivity types
-    'ConnectivityType',
-    'ConnectivityPattern',
-    'FaceConnectivity',
-    'EdgeConnectivity', 
-    'VertexConnectivity',
-    'CustomConnectivity',
-    'AdaptiveConnectivity',
-    'ConnectivityFactory',
-    'get_connectivity_info',
-    'visualize_connectivity_2d',
+    'Connectivity',
     
     # Neighbor generation
     'NeighborGenerator',

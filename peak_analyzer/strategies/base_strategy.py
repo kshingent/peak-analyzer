@@ -15,7 +15,7 @@ from ..models import Peak
 @dataclass
 class StrategyConfig:
     """Configuration parameters for strategies."""
-    connectivity: str | int = 'face'
+    connectivity: int = 1
     boundary_type: str = 'infinite_height'
     min_plateau_size: int = 1
     noise_threshold: float = 0.0

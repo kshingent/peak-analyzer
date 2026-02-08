@@ -62,7 +62,7 @@ data = np.random.randn(100, 100) + 5
 # アナライザー初期化
 analyzer = PeakAnalyzer(
     strategy='auto',
-    connectivity='face', 
+    connectivity=1, 
     boundary='infinite_height'
 )
 

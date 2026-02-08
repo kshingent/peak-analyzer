@@ -13,7 +13,7 @@ from .base_strategy import BaseStrategy, StrategyConfig
 from ..models import Peak
 from ..core.plateau_detector import PlateauDetector, PlateauRegion
 from ..core.prominence_calculator import ProminenceCalculator
-from ..connectivity.connectivity_types import get_k_connectivity
+from ..connectivity.connectivity_types import Connectivity
 
 
 class PlateauFirstStrategy(BaseStrategy):
@@ -153,7 +153,8 @@ class PlateauFirstStrategy(BaseStrategy):
             Boolean mask of potential peak cells
         """
         # Get connectivity structure for filter
-        connectivity_structure = get_k_connectivity(data.ndim, self.config.connectivity)
+        conn = Connectivity(data.ndim, self.config.connectivity)
+        connectivity_structure = conn.structure
         
         # Apply maximum filter
         max_filtered = maximum_filter(data, footprint=connectivity_structure)
@@ -182,7 +183,8 @@ class PlateauFirstStrategy(BaseStrategy):
         plateaus = []
         
         # Get connectivity structure
-        connectivity_structure = get_k_connectivity(data.ndim, self.config.connectivity)
+        conn = Connectivity(data.ndim, self.config.connectivity)
+        connectivity_structure = conn.structure
         
         # Get unique heights in masked region
         masked_data = data * mask
@@ -242,7 +244,8 @@ class PlateauFirstStrategy(BaseStrategy):
         if self.dilation_structure is not None:
             structure = self.dilation_structure
         else:
-            structure = get_k_connectivity(data.ndim, self.config.connectivity)
+            conn = Connectivity(data.ndim, self.config.connectivity)
+            structure = conn.structure
         
         for plateau in candidates:
             if self._validate_single_plateau(plateau, data, structure):

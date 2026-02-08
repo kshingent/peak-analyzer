@@ -314,7 +314,7 @@ class SaddlePoint:
 **peak_detector.py**: Main analysis engine
 ```python
 class PeakAnalyzer:
-    def __init__(self, strategy='auto', connectivity='face', 
+    def __init__(self, strategy='auto', connectivity=1, 
                  boundary='infinite_height', scale=None, 
                  distance_metric='euclidean', **kwargs)
     def find_peaks(self, data, **filters) -> PeakCollection
@@ -586,13 +586,13 @@ class PlateauFirstStrategy:
 
 #### **connectivity/connectivity_types.py**
 ```python
-def get_k_connectivity(ndim: int, k: int) -> np.ndarray
-def generate_k_connected_offsets(ndim: int, k: int) -> np.ndarray
-# k=1: Face sharing (2n neighbors)
-# k=2: Face + edge sharing 
-# k=3: Face + edge + vertex sharing
-# ...
-# k=ndim: All boundary sharing (3^n-1 neighbors)
+class Connectivity:
+    def __init__(self, ndim: int, k: int)
+    def get_neighbors(self, center: tuple, shape: tuple) -> np.ndarray
+    @property
+    def neighbor_count(self) -> int
+# N-dimensional k-connectivity implementation
+# k=1: face connectivity, k=ndim: full (Moore) connectivity
 ```
 
 #### **boundary/boundary_conditions.py**

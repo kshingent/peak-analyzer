@@ -10,7 +10,7 @@ import numpy as np
 from collections import deque
 from abc import ABC, abstractmethod
 
-from .connectivity_types import ConnectivityPattern
+from .connectivity_types import Connectivity
 
 
 class NeighborGenerator(ABC):
@@ -18,13 +18,13 @@ class NeighborGenerator(ABC):
     Abstract base class for neighbor generation algorithms.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """
         Initialize neighbor generator.
         
         Parameters:
         -----------
-        connectivity : ConnectivityPattern
+        connectivity : Connectivity
             Connectivity pattern to use
         """
         self.connectivity = connectivity
@@ -74,7 +74,7 @@ class StandardNeighborGenerator(NeighborGenerator):
     Standard implementation using direct offset application.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize standard neighbor generator."""
         super().__init__(connectivity)
         self._offset_cache = {}
@@ -98,7 +98,7 @@ class VectorizedNeighborGenerator(NeighborGenerator):
     Vectorized implementation using NumPy operations for efficiency.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize vectorized neighbor generator."""
         super().__init__(connectivity)
         self._offsets_array = np.array(connectivity.get_neighbor_offsets())
@@ -149,7 +149,7 @@ class CachedNeighborGenerator(NeighborGenerator):
     Cached implementation that stores previously computed neighbors.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern, cache_size: int = 10000):
+    def __init__(self, connectivity: Connectivity, cache_size: int = 10000):
         """
         Initialize cached neighbor generator.
         
@@ -248,7 +248,7 @@ class RegionNeighborGenerator:
     Specialized generator for computing neighbors within specific regions.
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize region neighbor generator."""
         self.connectivity = connectivity
         self.ndim = connectivity.ndim
@@ -325,7 +325,7 @@ class IterativeNeighborGenerator:
     Generator for iterative neighbor exploration (BFS, DFS).
     """
     
-    def __init__(self, connectivity: ConnectivityPattern):
+    def __init__(self, connectivity: Connectivity):
         """Initialize iterative neighbor generator."""
         self.connectivity = connectivity
         self.ndim = connectivity.ndim
@@ -452,7 +452,7 @@ class NeighborGeneratorFactory:
     """
     
     @staticmethod
-    def create_generator(connectivity: ConnectivityPattern, 
+    def create_generator(connectivity: Connectivity, 
                         generator_type: str = "vectorized",
                         **kwargs) -> NeighborGenerator:
         """
@@ -460,7 +460,7 @@ class NeighborGeneratorFactory:
         
         Parameters:
         -----------
-        connectivity : ConnectivityPattern
+        connectivity : Connectivity
             Connectivity pattern to use
         generator_type : str
             Type of generator ('standard', 'vectorized', 'cached')
@@ -483,7 +483,7 @@ class NeighborGeneratorFactory:
             raise ValueError(f"Unknown generator type: {generator_type}")
 
 
-def benchmark_generators(connectivity: ConnectivityPattern, 
+def benchmark_generators(connectivity: Connectivity, 
                         positions: list[tuple[int, ...]], 
                         shape: tuple[int, ...]) -> dict[str, dict[str, float]]:
     """
@@ -491,7 +491,7 @@ def benchmark_generators(connectivity: ConnectivityPattern,
     
     Parameters:
     -----------
-    connectivity : ConnectivityPattern
+    connectivity : Connectivity
         Connectivity pattern to test
     positions : list[tuple of int]
         Test positions
