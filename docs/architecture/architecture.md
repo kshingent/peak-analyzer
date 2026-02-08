@@ -8,7 +8,7 @@ PeakAnalyzer employs a layered, modular architecture that provides a comprehensi
 
 ```mermaid
 flowchart TD
-    A["User API Layer<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["Core Control Layer<br/>StrategySelector & Manager<br/>(strategy_selector.py)"]
+    A["User API Layer<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["Core Control Layer<br/>StrategyManager<br/>(strategy_manager.py)"]
     B --> C["Algorithm Layer<br/>UnionFindStrategy | PlateauFirst Strategy"]
     C --> D["Feature Computation Layer<br/>Geometric Features | Topographic Features | Distance Features"]
     D --> E["Foundation Services Layer<br/>Connectivity & Neighbors | Boundary Handling | Validation & Memory"]
@@ -51,7 +51,6 @@ peak_analyzer/
 │   ├── strategies/                  # Detection Strategy Implementation Layer
 │   │   ├── base_strategy.py         # Strategy base class
 │   │   ├── union_find_strategy.py   # Union-Find strategy
-│   │   ├── plateau_first_strategy.py # Plateau-first strategy
 │   │   ├── plateau_first_strategy.py # Plateau-first strategy
 │   │   └── strategy_factory.py      # Strategy factory
 │   │

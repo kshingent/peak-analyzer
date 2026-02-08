@@ -56,14 +56,10 @@ class StrategyManager:
             )
         
         # Determine optimal strategy based on characteristics
-        strategy_name = self._choose_strategy(characteristics, **kwargs)
+        strategy_name = self._decide_strategy_name(characteristics, **kwargs)
         
         # Create or retrieve strategy instance
-        if strategy_name not in self.strategy_cache:
-            strategy_class = self.available_strategies[strategy_name]
-            self.strategy_cache[strategy_name] = strategy_class()
-            
-        return self.strategy_cache[strategy_name]
+        return self._get_cached_strategy(strategy_name)
     
     def estimate_computational_cost(self, strategy_name: str, data_shape: tuple[int, ...]) -> dict[str, float]:
         """
@@ -163,119 +159,94 @@ class StrategyManager:
         BaseStrategy
             Optimally configured strategy instance
         """
-        # Recommend strategy based on data characteristics
-        strategy_name = self._recommend_strategy_by_characteristics(data_shape, characteristics)
+        # Create dummy characteristics if not provided
+        if characteristics is None:
+            characteristics = self._create_dummy_characteristics(data_shape)
         
-        # Create base configuration
-        config = StrategyConfig()
-        strategy_kwargs = {}
+        # Determine optimal strategy using unified logic
+        strategy_name = self._decide_strategy_name(
+            characteristics, 
+            performance_requirements=performance_requirements
+        )
         
-        # Apply performance-based adjustments
-        if performance_requirements:
-            max_time = performance_requirements.get('max_time_seconds')
-            if max_time and max_time < 10:  # 10 seconds
-                strategy_name = 'plateau_first'  # Generally faster for simple cases
-                    
-            min_accuracy = performance_requirements.get('min_accuracy', 0.8)
-            if min_accuracy > 0.9:
-                # High accuracy requirement - prefer union_find
-                if strategy_name == 'plateau_first':
-                    strategy_name = 'union_find'
-        
-        # Apply data characteristic adjustments
-        if characteristics:
-            # Adjust connectivity based on data dimensionality
-            if len(data_shape) > 3:
-                config.connectivity = 1  # Conservative for high dimensions
-            
-            # Adjust noise handling
-            if characteristics.noise_level > 0.1:
-                config.noise_threshold = characteristics.noise_level * 0.5
+        # Build configuration based on characteristics and requirements
+        config = self._build_config(characteristics, performance_requirements, data_shape)
         
         # Create configured strategy
         strategy_class = self.available_strategies[strategy_name]
-        return strategy_class(config=config, **strategy_kwargs)
+        return strategy_class(config=config)
     
-    def _recommend_strategy_by_characteristics(
+    def _decide_strategy_name(
         self, 
-        data_shape: tuple, 
-        characteristics: DataCharacteristics | None = None
+        characteristics: DataCharacteristics, 
+        performance_requirements: dict[str, Any] | None = None,
+        **kwargs
     ) -> str:
         """
-        Recommend optimal strategy based on data characteristics.
+        Unified strategy decision logic based on data characteristics and performance requirements.
+        
+        This is the single source of truth for strategy selection.
         
         Parameters:
         -----------
-        data_shape : tuple
-            Shape of input data
-        characteristics : DataCharacteristics, optional
+        characteristics : DataCharacteristics
             Data characteristics from DataAnalyzer
+        performance_requirements : dict, optional
+            Performance requirements (max_time_seconds, min_accuracy, etc.)
+        **kwargs
+            Additional parameters. Supports 'strategy_name' or 'force_strategy' for manual override.
             
         Returns:
         --------
         str
-            Recommended strategy name
+            Strategy name to use
         """
-        data_size = np.prod(data_shape)
+        # Manual strategy override - highest priority
+        manual_strategy = kwargs.get('strategy_name') or kwargs.get('force_strategy')
+        if manual_strategy:
+            if manual_strategy not in self.available_strategies:
+                raise ValueError(f"Unknown strategy: {manual_strategy}")
+            return manual_strategy
         
-        if characteristics is None:
-            # Default heuristics based on data size only
-            if data_size > 1000000:  # 1M elements
-                return 'union_find'
-            else:
-                return 'plateau_first'
-        
-        # Use detailed characteristics for decision
-        plateau_ratio = characteristics.plateau_ratio
-        noise_level = characteristics.noise_level
-        peak_density = characteristics.peak_density_estimate
-        
-        # For very large data, use union_find for consistency
-        if data_size > 10000000:  # 10M elements
-            return 'union_find'
-        
-        # For high plateau ratio, use plateau_first
-        if plateau_ratio > 0.3:
-            return 'plateau_first'
-        
-        # For very noisy data or high peak density, use union_find
-        if noise_level > 0.2 or peak_density > 0.05:
-            return 'union_find'
-        
-        # For medium-sized data, use union_find as default
-        if data_size > 1000000:  # 1M elements
-            return 'union_find'
-        
-        # Default to plateau_first for smaller data
-        return 'plateau_first'
-    
-    def _choose_strategy(self, characteristics: DataCharacteristics, **kwargs) -> str:
-        """Choose optimal strategy based on data characteristics."""
         data_size = np.prod(characteristics.shape)
         plateau_ratio = characteristics.plateau_ratio
         noise_level = characteristics.noise_level
         peak_density = characteristics.peak_density_estimate
         
+        # 1. Performance requirements override data-based decisions
+        if performance_requirements:
+            max_time = performance_requirements.get('max_time_seconds')
+            min_accuracy = performance_requirements.get('min_accuracy', 0.8)
+            
+            # High accuracy requirement - prefer union_find
+            if min_accuracy > 0.9:
+                return 'union_find'
+            
+            # Time constraint - prefer faster plateau_first for simple cases
+            if max_time and max_time < 10 and data_size < 100000 and plateau_ratio > 0.1:
+                return 'plateau_first'
+        
+        # 2. Data-based strategy selection
         # For small data or very high plateau ratio, use plateau-first
-        if (data_size < 10000 or plateau_ratio > 0.4):
+        if data_size < 10000 or plateau_ratio > 0.4:
             return 'plateau_first'
         
         # For large data with low plateau ratio, use union-find
-        elif (data_size > 100000 and plateau_ratio < 0.1):
+        if data_size > 100000 and plateau_ratio < 0.1:
             return 'union_find'
         
         # For high plateau ratio (moderate), prefer plateau-first
-        elif plateau_ratio > 0.2:
+        if plateau_ratio > 0.2:
             return 'plateau_first'
         
         # For noisy data or high peak density, prefer union-find
-        elif (noise_level > characteristics.value_range[1] * 0.1 or 
+        if (noise_level > characteristics.value_range[1] * 0.1 or 
               peak_density > 0.01):
             return 'union_find'
         
         # Default: for medium-sized data with balanced characteristics
         # Choose based on data size
-        elif data_size > 50000:
+        if data_size > 50000:
             return 'union_find'
         else:
             return 'plateau_first'
@@ -314,3 +285,88 @@ class StrategyManager:
             peaks_detected=len(peaks),
             quality_metrics=quality_metrics
         )
+    
+    def _get_cached_strategy(self, strategy_name: str) -> BaseStrategy:
+        """
+        Get cached strategy instance or create new one.
+        
+        Parameters:
+        -----------
+        strategy_name : str
+            Name of strategy to retrieve
+            
+        Returns:
+        --------
+        BaseStrategy
+            Strategy instance
+        """
+        if strategy_name not in self.strategy_cache:
+            strategy_class = self.available_strategies[strategy_name]
+            self.strategy_cache[strategy_name] = strategy_class()
+            
+        return self.strategy_cache[strategy_name]
+    
+    def _create_dummy_characteristics(self, data_shape: tuple) -> DataCharacteristics:
+        """
+        Create dummy characteristics when not provided.
+        
+        Parameters:
+        -----------
+        data_shape : tuple
+            Shape of input data
+            
+        Returns:
+        --------
+        DataCharacteristics
+            Dummy characteristics with conservative defaults
+        """
+        
+        # Conservative defaults for unknown data
+        return DataCharacteristics(
+            shape=data_shape,
+            value_range=(0.0, 1.0),
+            plateau_ratio=0.1,  # Assume low plateau ratio
+            noise_level=0.05,   # Assume low noise
+            peak_density_estimate=0.005  # Assume moderate peak density
+        )
+    
+    def _build_config(
+        self, 
+        characteristics: DataCharacteristics, 
+        performance_requirements: dict[str, Any] | None,
+        data_shape: tuple
+    ) -> StrategyConfig:
+        """
+        Build strategy configuration based on characteristics and requirements.
+        
+        Parameters:
+        -----------
+        characteristics : DataCharacteristics
+            Data characteristics
+        performance_requirements : dict, optional
+            Performance requirements
+        data_shape : tuple
+            Shape of input data
+            
+        Returns:
+        --------
+        StrategyConfig
+            Configured strategy parameters
+        """
+        config = StrategyConfig()
+        
+        # Adjust connectivity based on data dimensionality
+        if len(data_shape) > 3:
+            config.connectivity = 1  # Conservative for high dimensions
+        
+        # Adjust noise handling based on data characteristics
+        if characteristics.noise_level > 0.1:
+            config.noise_threshold = characteristics.noise_level * 0.5
+        
+        # Performance-based adjustments
+        if performance_requirements:
+            max_memory = performance_requirements.get('max_memory_mb')
+            if max_memory and max_memory < 1000:  # Less than 1GB
+                config.chunk_size = min(config.chunk_size or 100000, 50000)
+        
+        return config

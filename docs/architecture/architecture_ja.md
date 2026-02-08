@@ -8,7 +8,7 @@ PeakAnalyzerは階層化されたモジュラーアーキテクチャを採用�
 
 ```mermaid
 flowchart TD
-    A["ユーザーAPIレイヤー<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["コア制御レイヤー<br/>ストラテジー選択・管理<br/>(strategy_selector.py)"]
+    A["ユーザーAPIレイヤー<br/>PeakAnalyzer<br/>(peak_detector.py)"] --> B["コア制御レイヤー<br/>StrategyManager<br/>(strategy_manager.py)"]
     B --> C["アルゴリズムレイヤー<br/>UnionFind戦略 | プラトー優先戦略"]
     C --> D["特徴量計算レイヤー<br/>幾何学的特徴量 | 地形学的特徴量 | 距離計算特徴量"]
     D --> E["基盤サービスレイヤー<br/>接続性と近傍生成 | 境界処理 | 検証とメモリ管理"]

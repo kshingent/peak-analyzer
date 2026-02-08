@@ -114,10 +114,14 @@ class LazyDataFrame:
 ### **core/strategy_manager.py**
 ```python
 class StrategyManager:
-    def select_optimal_strategy(self, data_characteristics) -> Strategy
-    def estimate_computational_cost(self, strategy, data_shape)
-    def benchmark_strategies(self, data, strategies) -> BenchmarkResults
+    def select_optimal_strategy(self, data, **kwargs) -> Strategy
+        # **kwargs supports 'strategy_name' or 'force_strategy' for manual override
+    def estimate_computational_cost(self, strategy_name, data_shape) -> dict[str, float]
+    def benchmark_strategies(self, data, strategies=None) -> list[BenchmarkResults]
     def configure_strategy(self, strategy_name, **params) -> Strategy
+    def auto_configure(self, data_shape, characteristics=None, 
+                      performance_requirements=None) -> Strategy
+        # Automatically configure optimal strategy with performance requirements
 ```
 
 ### **core/plateau_detector.py**
