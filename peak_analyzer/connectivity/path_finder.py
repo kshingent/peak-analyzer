@@ -12,7 +12,7 @@ import heapq
 from abc import ABC, abstractmethod
 
 from .connectivity_types import Connectivity
-from .neighbor_generator import VectorizedNeighborGenerator
+from .neighbor_generator import compute_neighbors
 
 
 class PathFinder(ABC):
@@ -30,7 +30,7 @@ class PathFinder(ABC):
             Connectivity pattern for neighbor relationships
         """
         self.connectivity = connectivity
-        self.neighbor_generator = VectorizedNeighborGenerator(connectivity)
+        self._neighbor_offsets = tuple(tuple(offset) for offset in connectivity.get_neighbor_offsets())
     
     @abstractmethod
     def find_path(self, start: tuple[int, ...], goal: tuple[int, ...], 
@@ -106,7 +106,7 @@ class BreadthFirstSearchFinder(PathFinder):
                 continue
             
             # Get neighbors
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             for neighbor in neighbors:
                 # Skip if already visited
@@ -183,7 +183,7 @@ class DijkstraFinder(PathFinder):
                 continue
             
             # Process neighbors
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             for neighbor in neighbors:
                 # Skip if obstacle or already processed
@@ -272,7 +272,7 @@ class AStarFinder(PathFinder):
                 continue
             
             # Process neighbors
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             for neighbor in neighbors:
                 # Skip if obstacle or already processed
@@ -354,7 +354,7 @@ class TopographicPathFinder(PathFinder):
                 return path
             
             # Calculate gradients to neighbors
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             if not neighbors:
                 break
@@ -425,7 +425,7 @@ class FloodFillFinder:
     def __init__(self, connectivity: Connectivity):
         """Initialize flood fill finder."""
         self.connectivity = connectivity
-        self.neighbor_generator = VectorizedNeighborGenerator(connectivity)
+        self._neighbor_offsets = tuple(tuple(offset) for offset in connectivity.get_neighbor_offsets())
     
     def flood_fill(self, start: tuple[int, ...], shape: tuple[int, ...], 
                   condition: Callable[[tuple[int, ...]], bool]) -> set[tuple[int, ...]]:
@@ -455,7 +455,7 @@ class FloodFillFinder:
         
         while queue:
             current = queue.popleft()
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             for neighbor in neighbors:
                 if neighbor not in filled and condition(neighbor):
@@ -510,7 +510,7 @@ class WatershedPathFinder:
     def __init__(self, connectivity: Connectivity):
         """Initialize watershed pathfinder."""
         self.connectivity = connectivity
-        self.neighbor_generator = VectorizedNeighborGenerator(connectivity)
+        self._neighbor_offsets = tuple(tuple(offset) for offset in connectivity.get_neighbor_offsets())
     
     def find_drainage_path(self, start: tuple[int, ...], data: np.ndarray, 
                           shape: tuple[int, ...], **kwargs) -> list[tuple[int, ...]]:
@@ -541,7 +541,7 @@ class WatershedPathFinder:
         visited = {start}
         
         for step in range(max_steps):
-            neighbors = self.neighbor_generator.get_neighbors(current, shape)
+            neighbors = list(compute_neighbors(current, shape, self._neighbor_offsets))
             
             # Remove already visited neighbors to avoid cycles
             neighbors = [n for n in neighbors if n not in visited]

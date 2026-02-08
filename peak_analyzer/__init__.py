@@ -32,7 +32,9 @@ from .features import (
 # Connectivity components
 from .connectivity import (
     Connectivity,
-    NeighborGenerator,
+    compute_neighbors,
+    compute_neighbors_bulk,
+    NeighborExplorer,
     PathFinder,
     DistanceMetric
 )
@@ -85,7 +87,9 @@ __all__ = [
     
     # Connectivity
     "Connectivity",
-    "NeighborGenerator", 
+    "compute_neighbors",
+    "compute_neighbors_bulk", 
+    "NeighborExplorer",
     "PathFinder",
     "DistanceMetric",
     
@@ -205,11 +209,11 @@ def analyze_peaks_comprehensive(data, coordinate_mapping=None,
         try:
             # Analyze peak connectivity 
             pattern = Connectivity(len(data.shape), len(data.shape))  # Full connectivity
-            neighbor_gen = NeighborGenerator(pattern)
+            offsets = tuple(tuple(offset) for offset in pattern.get_neighbor_offsets())
             
             results['connectivity'] = {}
             for i, peak in enumerate(peaks):
-                neighbors = neighbor_gen.get_neighbors(peak.indices)
+                neighbors = list(compute_neighbors(peak.indices, data.shape, offsets))
                 results['connectivity'][i] = {
                     'neighbors': neighbors,
                     'neighbor_count': len(neighbors)

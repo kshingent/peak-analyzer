@@ -13,11 +13,12 @@ VertexConnectivity : Vertex connectivity (8-conn in 2D, 26-conn in 3D)
 CustomConnectivity : User-defined connectivity patterns
 AdaptiveConnectivity : Connectivity that adapts to local conditions
 
-NeighborGenerator : Abstract base for neighbor generation
-StandardNeighborGenerator : Direct offset-based generation
-VectorizedNeighborGenerator : NumPy vectorized generation
-CachedNeighborGenerator : Cached neighbor generation
-RegionNeighborGenerator : Specialized for region analysis
+NeighborGenerator Functions : Simplified neighbor computation
+compute_neighbors : Compute neighbors for single position (with caching)
+compute_neighbors_bulk : Efficient bulk neighbor computation
+NeighborExplorer : BFS/DFS/radial exploration patterns
+region_neighbors : Neighbors within specific regions
+boundary_neighbors : External neighbors for boundary analysis
 
 PathFinder : Abstract base for pathfinding algorithms
 BreadthFirstSearchFinder : BFS pathfinding
@@ -40,20 +41,25 @@ GeodesicDistance : Distance along paths
 Usage:
 ------
     from peak_analyzer.connectivity import (
-        ConnectivityFactory, NeighborGeneratorFactory, 
-        PathFinderFactory, DistanceMetricFactory
+        ConnectivityFactory, compute_neighbors, compute_neighbors_bulk,
+        NeighborExplorer, PathFinderFactory, DistanceMetricFactory
     )
     
     # Create connectivity pattern
     connectivity = ConnectivityFactory.create_connectivity(ConnectivityType.VERTEX, ndim=3)
+    offsets = tuple(tuple(offset) for offset in connectivity.get_neighbor_offsets())
     
-    # Create neighbor generator
-    neighbor_gen = NeighborGeneratorFactory.create_generator(
-        connectivity, generator_type="vectorized"
-    )
+    # Get neighbors for a single position  
+    neighbors = compute_neighbors((10, 15, 5), shape=(100, 100, 50), connectivity_offsets=offsets)
     
-    # Get neighbors for a position
-    neighbors = neighbor_gen.get_neighbors((10, 15, 5), shape=(100, 100, 50))
+    # Get neighbors for multiple positions efficiently
+    positions = [(10, 15, 5), (20, 25, 10), (5, 8, 2)]
+    all_neighbors = compute_neighbors_bulk(positions, shape=(100, 100, 50), connectivity_offsets=offsets)
+    
+    # Explore neighbors with BFS/DFS patterns
+    explorer = NeighborExplorer(connectivity)
+    for position, distance in explorer.bfs_explore((10, 15, 5), shape=(100, 100, 50), max_distance=3):
+        print(f"Position {position} at distance {distance}")
     
     # Create pathfinder
     pathfinder = PathFinderFactory.create_pathfinder("astar", connectivity)
@@ -73,14 +79,11 @@ Usage:
 from .connectivity_types import Connectivity
 
 from .neighbor_generator import (
-    NeighborGenerator,
-    StandardNeighborGenerator,
-    VectorizedNeighborGenerator,
-    CachedNeighborGenerator,
-    RegionNeighborGenerator,
-    IterativeNeighborGenerator,
-    NeighborGeneratorFactory,
-    benchmark_generators
+    compute_neighbors,
+    compute_neighbors_bulk,
+    NeighborExplorer,
+    region_neighbors,
+    boundary_neighbors
 )
 
 from .path_finder import (
@@ -116,14 +119,11 @@ __all__ = [
     'Connectivity',
     
     # Neighbor generation
-    'NeighborGenerator',
-    'StandardNeighborGenerator',
-    'VectorizedNeighborGenerator',
-    'CachedNeighborGenerator',
-    'RegionNeighborGenerator',
-    'IterativeNeighborGenerator', 
-    'NeighborGeneratorFactory',
-    'benchmark_generators',
+    'compute_neighbors',
+    'compute_neighbors_bulk',
+    'NeighborExplorer',
+    'region_neighbors',
+    'boundary_neighbors',
     
     # Pathfinding
     'PathFinder',
