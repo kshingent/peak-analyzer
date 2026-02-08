@@ -9,8 +9,7 @@ from typing import Any
 import numpy as np
 from dataclasses import dataclass
 
-from ..api.result_dataframe import Peak
-from ..core.strategy_manager import PerformanceMetrics
+from ..models import Peak
 
 
 @dataclass
@@ -87,7 +86,7 @@ class BaseStrategy(ABC):
     
     @classmethod
     @abstractmethod
-    def estimate_performance(cls, data_shape: tuple[int, ...]) -> PerformanceMetrics:
+    def estimate_performance(cls, data_shape: tuple[int, ...]) -> dict[str, float]:
         """
         Estimate performance metrics for given data shape.
         
@@ -98,8 +97,9 @@ class BaseStrategy(ABC):
             
         Returns:
         --------
-        PerformanceMetrics
-            Estimated performance metrics
+        dict[str, float]
+            Dictionary with performance metrics containing keys:
+            'estimated_time', 'estimated_memory', 'accuracy_score', 'scalability_factor'
         """
         pass
     

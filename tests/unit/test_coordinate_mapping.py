@@ -10,16 +10,18 @@ import os
 import pytest
 import numpy as np
 
-# Add the package root to the path to import modules directly
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../'))
+# Add the package root to the path to import modules directly without package initialization
+peak_analyzer_root = os.path.join(os.path.dirname(__file__), '../../peak_analyzer')
+sys.path.insert(0, peak_analyzer_root)
 
-from peak_analyzer.coordinate_system.coordinate_mapping import (
+# Direct imports to avoid package initialization circular dependencies
+from coordinate_system.coordinate_mapping import (
     CoordinateMapping, 
     create_isotropic_mapping, 
     create_anisotropic_mapping,
     create_physical_mapping
 )
-from peak_analyzer.coordinate_system.grid_manager import GridManager
+from coordinate_system.grid_manager import GridManager
 
 
 class TestCoordinateMapping:

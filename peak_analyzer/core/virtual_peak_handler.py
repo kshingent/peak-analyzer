@@ -7,7 +7,7 @@ Handles creation and management of virtual peaks for same-height connected peaks
 import numpy as np
 from dataclasses import dataclass
 
-from ..api.result_dataframe import Peak
+from ..models import Peak, VirtualPeak, SaddlePoint
 from ..connectivity.path_finder import PathFinder
 
 
@@ -18,25 +18,6 @@ class PeakGroup:
     common_height: float
     connection_paths: dict[tuple[int, int], list[tuple[int, ...]]]  # Paths between peak pairs
     saddle_points: list[tuple[int, ...]]
-
-
-@dataclass
-class VirtualPeak:
-    """Virtual peak representing a group of connected same-height peaks."""
-    constituent_peaks: list[Peak]
-    virtual_center: tuple[float, ...]  # Centroid of all constituent peaks
-    height: float
-    virtual_prominence: float
-    virtual_prominence_base: tuple[int, ...]
-    total_area: int  # Combined area of all constituent peaks
-
-
-@dataclass
-class SaddlePoint:
-    """Represents a saddle point between peaks or peak groups."""
-    coordinates: tuple[int, ...]
-    height: float
-    connected_peaks: list[int]  # Peak IDs connected by this saddle
 
 
 class VirtualPeakHandler:

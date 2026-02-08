@@ -14,7 +14,6 @@ from .base_strategy import BaseStrategy, StrategyConfig
 from ..api.result_dataframe import Peak
 from ..core.union_find import GridUnionFind
 from ..connectivity.connectivity_types import get_k_connectivity
-from ..core.strategy_manager import PerformanceMetrics
 
 
 @dataclass
@@ -435,7 +434,7 @@ class UnionFindStrategy(BaseStrategy):
         return features
     
     @classmethod
-    def estimate_performance(cls, data_shape: tuple[int, ...]) -> PerformanceMetrics:
+    def estimate_performance(cls, data_shape: tuple[int, ...]) -> dict[str, float]:
         """Estimate performance for Union-Find strategy."""
         data_size = np.prod(data_shape)
         
@@ -451,9 +450,10 @@ class UnionFindStrategy(BaseStrategy):
         # Scalability is good
         scalability_factor = 0.8
         
-        return PerformanceMetrics(
-            estimated_time=estimated_time,
-            estimated_memory=estimated_memory,
-            accuracy_score=accuracy_score,
-            scalability_factor=scalability_factor
-        )
+        return {
+            "estimated_time": estimated_time,
+            "estimated_memory": estimated_memory,
+            "accuracy_score": accuracy_score,
+            "scalability_factor": scalability_factor
+        }
+        

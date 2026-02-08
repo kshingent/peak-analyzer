@@ -12,7 +12,7 @@ from .base_strategy import BaseStrategy, StrategyConfig
 from .union_find_strategy import UnionFindStrategy
 from .plateau_first_strategy import PlateauFirstStrategy
 from ..api.result_dataframe import Peak
-from ..core.strategy_manager import PerformanceMetrics, DataCharacteristics
+from ..core.strategy_manager import DataCharacteristics
 
 
 class HybridStrategy(BaseStrategy):
@@ -427,26 +427,26 @@ class HybridStrategy(BaseStrategy):
         return self.union_find_strategy.calculate_features(peaks, data)
     
     @classmethod
-    def estimate_performance(cls, data_shape: tuple[int, ...]) -> PerformanceMetrics:
+    def estimate_performance(cls, data_shape: tuple[int, ...]) -> dict[str, float]:
         """Estimate performance for Hybrid strategy."""
         # Get estimates from component strategies
         uf_metrics = UnionFindStrategy.estimate_performance(data_shape)
         pf_metrics = PlateauFirstStrategy.estimate_performance(data_shape)
         
         # Hybrid performance is between the two, slightly higher due to analysis overhead
-        estimated_time = (uf_metrics.estimated_time + pf_metrics.estimated_time) / 2 * 1.1
-        estimated_memory = max(uf_metrics.estimated_memory, pf_metrics.estimated_memory) * 1.05
+        estimated_time = (uf_metrics["estimated_time"] + pf_metrics["estimated_time"]) / 2 * 1.1
+        estimated_memory = max(uf_metrics["estimated_memory"], pf_metrics["estimated_memory"]) * 1.05
         
         # Accuracy should be better than individual strategies
-        accuracy_score = max(uf_metrics.accuracy_score, pf_metrics.accuracy_score) * 1.05
+        accuracy_score = max(uf_metrics["accuracy_score"], pf_metrics["accuracy_score"]) * 1.05
         accuracy_score = min(accuracy_score, 1.0)  # Cap at 1.0
         
         # Good scalability due to adaptive approach
         scalability_factor = 0.9
         
-        return PerformanceMetrics(
-            estimated_time=estimated_time,
-            estimated_memory=estimated_memory,
-            accuracy_score=accuracy_score,
-            scalability_factor=scalability_factor
-        )
+        return {
+            "estimated_time": estimated_time,
+            "estimated_memory": estimated_memory,
+            "accuracy_score": accuracy_score,
+            "scalability_factor": scalability_factor
+        }

@@ -26,15 +26,6 @@ class DataCharacteristics:
 
 
 @dataclass
-class PerformanceMetrics:
-    """Performance metrics for strategy evaluation."""
-    estimated_time: float
-    estimated_memory: float
-    accuracy_score: float
-    scalability_factor: float
-
-
-@dataclass
 class BenchmarkResults:
     """Results from strategy benchmarking."""
     strategy_name: str
@@ -87,7 +78,7 @@ class StrategyManager:
             
         return self.strategy_cache[strategy_name]
     
-    def estimate_computational_cost(self, strategy_name: str, data_shape: tuple[int, ...]) -> PerformanceMetrics:
+    def estimate_computational_cost(self, strategy_name: str, data_shape: tuple[int, ...]) -> dict[str, float]:
         """
         Estimate computational cost for a strategy and data size.
         
@@ -100,8 +91,9 @@ class StrategyManager:
             
         Returns:
         --------
-        PerformanceMetrics
-            Estimated performance metrics
+        dict[str, float]
+            Dictionary with performance metrics containing keys:
+            'estimated_time', 'estimated_memory', 'accuracy_score', 'scalability_factor'
         """
         if strategy_name not in self.available_strategies:
             raise ValueError(f"Unknown strategy: {strategy_name}")

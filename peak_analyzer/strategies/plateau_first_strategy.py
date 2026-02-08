@@ -14,7 +14,6 @@ from ..api.result_dataframe import Peak
 from ..core.plateau_detector import PlateauDetector, PlateauRegion
 from ..core.prominence_calculator import ProminenceCalculator
 from ..connectivity.connectivity_types import get_k_connectivity
-from ..core.strategy_manager import PerformanceMetrics
 
 
 class PlateauFirstStrategy(BaseStrategy):
@@ -396,7 +395,7 @@ class PlateauFirstStrategy(BaseStrategy):
         return features
     
     @classmethod
-    def estimate_performance(cls, data_shape: tuple[int, ...]) -> PerformanceMetrics:
+    def estimate_performance(cls, data_shape: tuple[int, ...]) -> dict[str, float]:
         """
         Estimate performance for Plateau-First strategy.
         
@@ -407,8 +406,9 @@ class PlateauFirstStrategy(BaseStrategy):
             
         Returns:
         --------
-        PerformanceMetrics
-            Performance metrics
+        dict[str, float]
+            Dictionary with performance metrics containing keys:
+            'estimated_time', 'estimated_memory', 'accuracy_score', 'scalability_factor'
         """
         data_size = np.prod(data_shape)
         
@@ -424,12 +424,12 @@ class PlateauFirstStrategy(BaseStrategy):
         # Good scalability
         scalability_factor = 0.9
         
-        return PerformanceMetrics(
-            estimated_time=estimated_time,
-            estimated_memory=estimated_memory,
-            accuracy_score=accuracy_score,
-            scalability_factor=scalability_factor
-        )
+        return {
+            "estimated_time": estimated_time,
+            "estimated_memory": estimated_memory,
+            "accuracy_score": accuracy_score,
+            "scalability_factor": scalability_factor
+        }
     
     def _validate_strategy_specific(self, data: np.ndarray) -> bool:
         """
