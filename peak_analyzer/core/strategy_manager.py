@@ -5,12 +5,14 @@ Handles automatic selection of optimal peak detection strategies based on data c
 """
 
 import numpy as np
+import warnings
+from typing import Any
 
 from peak_analyzer.models import DataCharacteristics, BenchmarkResults
-from peak_analyzer.strategies.base_strategy import BaseStrategy
+from peak_analyzer.strategies.base_strategy import BaseStrategy, StrategyConfig
 from peak_analyzer.strategies.union_find_strategy import UnionFindStrategy
 from peak_analyzer.strategies.plateau_first_strategy import PlateauFirstStrategy
-from peak_analyzer.strategies.hybrid_strategy import HybridStrategy
+from peak_analyzer.core.data_analyzer import DataAnalyzer
 
 
 class StrategyManager:
@@ -22,10 +24,10 @@ class StrategyManager:
         """Initialize strategy manager."""
         self.available_strategies = {
             'union_find': UnionFindStrategy,
-            'plateau_first': PlateauFirstStrategy,
-            'hybrid': HybridStrategy
+            'plateau_first': PlateauFirstStrategy
         }
         self.strategy_cache = {}
+        self.data_analyzer = DataAnalyzer()
         
     def select_optimal_strategy(self, data: np.ndarray, **kwargs) -> BaseStrategy:
         """
@@ -43,8 +45,15 @@ class StrategyManager:
         BaseStrategy
             Optimal strategy instance for the given data
         """
-        # Analyze data characteristics
-        characteristics = self._analyze_data_characteristics(data)
+        # Analyze data characteristics using specialized analyzer
+        characteristics = self.data_analyzer.analyze_characteristics(data)
+        
+        # Check if chunked processing is needed
+        if self.data_analyzer.should_use_chunking(data):
+            warnings.warn(
+                f"Large dataset detected ({data.size} elements). "
+                "Consider using smaller data chunks or optimized processing."
+            )
         
         # Determine optimal strategy based on characteristics
         strategy_name = self._choose_strategy(characteristics, **kwargs)
@@ -128,115 +137,148 @@ class StrategyManager:
         if strategy_name not in self.available_strategies:
             raise ValueError(f"Unknown strategy: {strategy_name}")
             
-        strategy_class = self.available_strategies[strategy_name]
+        strategy_class = self.available_strategies[strategy_name]       
         return strategy_class(**params)
     
-    def _analyze_data_characteristics(self, data: np.ndarray) -> DataCharacteristics:
-        """Analyze characteristics of input data."""
-        # Basic properties
-        shape = data.shape
-        ndim = data.ndim
-        data_type = str(data.dtype)
-        value_range = (float(data.min()), float(data.max()))
+    def auto_configure(
+        self,
+        data_shape: tuple,
+        characteristics: DataCharacteristics | None = None,
+        performance_requirements: dict[str, Any] | None = None
+    ) -> BaseStrategy:
+        """
+        Automatically configure optimal strategy for given requirements.
         
-        # Estimate plateau ratio
-        plateau_ratio = self._estimate_plateau_ratio(data)
-        
-        # Estimate noise level
-        noise_level = self._estimate_noise_level(data)
-        
-        # Estimate peak density
-        peak_density_estimate = self._estimate_peak_density(data)
-        
-        return DataCharacteristics(
-            shape=shape,
-            ndim=ndim,
-            data_type=data_type,
-            value_range=value_range,
-            plateau_ratio=plateau_ratio,
-            noise_level=noise_level,
-            peak_density_estimate=peak_density_estimate
-        )
-    
-    def _estimate_plateau_ratio(self, data: np.ndarray) -> float:
-        """Estimate percentage of data that forms plateaus."""
-        # Simple implementation: count cells with identical neighbors
-        plateau_cells = 0
-        total_cells = data.size
-        
-        # Generate neighbor offsets for face connectivity
-        offsets = self._get_face_connectivity_offsets(data.ndim)
-        
-        # Count cells with at least one identical neighbor
-        it = np.nditer(data, flags=['multi_index'])
-        while not it.finished:
-            current_value = it[0]
-            current_index = it.multi_index
+        Parameters:
+        -----------
+        data_shape : tuple
+            Shape of input data
+        characteristics : DataCharacteristics, optional
+            Data characteristics from DataAnalyzer
+        performance_requirements : dict, optional
+            Performance requirements (max_memory, max_time, etc.)
             
-            has_identical_neighbor = False
-            for offset in offsets:
-                neighbor_index = tuple(
-                    current_index[i] + offset[i] for i in range(data.ndim)
-                )
-                
-                # Check bounds
-                if all(0 <= neighbor_index[i] < data.shape[i] for i in range(data.ndim)):
-                    if data[neighbor_index] == current_value:
-                        has_identical_neighbor = True
-                        break
-                        
-            if has_identical_neighbor:
-                plateau_cells += 1
-                
-            it.iternext()
+        Returns:
+        --------
+        BaseStrategy
+            Optimally configured strategy instance
+        """
+        # Recommend strategy based on data characteristics
+        strategy_name = self._recommend_strategy_by_characteristics(data_shape, characteristics)
+        
+        # Create base configuration
+        config = StrategyConfig()
+        strategy_kwargs = {}
+        
+        # Apply performance-based adjustments
+        if performance_requirements:
+            max_time = performance_requirements.get('max_time_seconds')
+            if max_time and max_time < 10:  # 10 seconds
+                strategy_name = 'plateau_first'  # Generally faster for simple cases
+                    
+            min_accuracy = performance_requirements.get('min_accuracy', 0.8)
+            if min_accuracy > 0.9:
+                # High accuracy requirement - prefer union_find
+                if strategy_name == 'plateau_first':
+                    strategy_name = 'union_find'
+        
+        # Apply data characteristic adjustments
+        if characteristics:
+            # Adjust connectivity based on data dimensionality
+            if len(data_shape) > 3:
+                config.connectivity = 1  # Conservative for high dimensions
             
-        return plateau_cells / total_cells if total_cells > 0 else 0.0
+            # Adjust noise handling
+            if characteristics.noise_level > 0.1:
+                config.noise_threshold = characteristics.noise_level * 0.5
+        
+        # Create configured strategy
+        strategy_class = self.available_strategies[strategy_name]
+        return strategy_class(config=config, **strategy_kwargs)
     
-    def _estimate_noise_level(self, data: np.ndarray) -> float:
-        """Estimate noise level in data."""
-        # Simple implementation: standard deviation of gradient magnitude
-        gradients = np.gradient(data)
-        if isinstance(gradients, list):
-            gradient_magnitude = np.sqrt(sum(g**2 for g in gradients))
-        else:
-            gradient_magnitude = np.abs(gradients)
+    def _recommend_strategy_by_characteristics(
+        self, 
+        data_shape: tuple, 
+        characteristics: DataCharacteristics | None = None
+    ) -> str:
+        """
+        Recommend optimal strategy based on data characteristics.
+        
+        Parameters:
+        -----------
+        data_shape : tuple
+            Shape of input data
+        characteristics : DataCharacteristics, optional
+            Data characteristics from DataAnalyzer
             
-        return float(np.std(gradient_magnitude))
-    
-    def _estimate_peak_density(self, data: np.ndarray) -> float:
-        """Estimate density of peaks in data."""
-        # Simple implementation: count local maxima
-        from scipy.ndimage import maximum_filter
+        Returns:
+        --------
+        str
+            Recommended strategy name
+        """
+        data_size = np.prod(data_shape)
         
-        # Apply local maximum filter
-        local_maxima = maximum_filter(data, size=3) == data
+        if characteristics is None:
+            # Default heuristics based on data size only
+            if data_size > 1000000:  # 1M elements
+                return 'union_find'
+            else:
+                return 'plateau_first'
         
-        # Count local maxima (excluding edges)
-        core_slice = tuple(slice(1, -1) for _ in range(data.ndim))
-        core_maxima = local_maxima[core_slice]
+        # Use detailed characteristics for decision
+        plateau_ratio = characteristics.plateau_ratio
+        noise_level = characteristics.noise_level
+        peak_density = characteristics.peak_density_estimate
         
-        peak_count = np.sum(core_maxima)
-        core_volume = core_maxima.size
+        # For very large data, use union_find for consistency
+        if data_size > 10000000:  # 10M elements
+            return 'union_find'
         
-        return peak_count / core_volume if core_volume > 0 else 0.0
+        # For high plateau ratio, use plateau_first
+        if plateau_ratio > 0.3:
+            return 'plateau_first'
+        
+        # For very noisy data or high peak density, use union_find
+        if noise_level > 0.2 or peak_density > 0.05:
+            return 'union_find'
+        
+        # For medium-sized data, use union_find as default
+        if data_size > 1000000:  # 1M elements
+            return 'union_find'
+        
+        # Default to plateau_first for smaller data
+        return 'plateau_first'
     
     def _choose_strategy(self, characteristics: DataCharacteristics, **kwargs) -> str:
         """Choose optimal strategy based on data characteristics."""
-        # Simple heuristic-based selection
+        data_size = np.prod(characteristics.shape)
+        plateau_ratio = characteristics.plateau_ratio
+        noise_level = characteristics.noise_level
+        peak_density = characteristics.peak_density_estimate
         
-        # For small data or high plateau ratio, use plateau-first
-        if (np.prod(characteristics.shape) < 10000 or  
-            characteristics.plateau_ratio > 0.3):
+        # For small data or very high plateau ratio, use plateau-first
+        if (data_size < 10000 or plateau_ratio > 0.4):
             return 'plateau_first'
         
         # For large data with low plateau ratio, use union-find
-        elif (np.prod(characteristics.shape) > 100000 and 
-              characteristics.plateau_ratio < 0.1):
+        elif (data_size > 100000 and plateau_ratio < 0.1):
             return 'union_find'
         
-        # Default to hybrid strategy
+        # For high plateau ratio (moderate), prefer plateau-first
+        elif plateau_ratio > 0.2:
+            return 'plateau_first'
+        
+        # For noisy data or high peak density, prefer union-find
+        elif (noise_level > characteristics.value_range[1] * 0.1 or 
+              peak_density > 0.01):
+            return 'union_find'
+        
+        # Default: for medium-sized data with balanced characteristics
+        # Choose based on data size
+        elif data_size > 50000:
+            return 'union_find'
         else:
-            return 'hybrid'
+            return 'plateau_first'
     
     def _benchmark_single_strategy(self, data: np.ndarray, strategy_name: str) -> BenchmarkResults:
         """Benchmark a single strategy."""
@@ -272,13 +314,3 @@ class StrategyManager:
             peaks_detected=len(peaks),
             quality_metrics=quality_metrics
         )
-    
-    def _get_face_connectivity_offsets(self, ndim: int) -> list[tuple[int, ...]]:
-        """Get offsets for face connectivity in N dimensions."""
-        offsets = []
-        for dim in range(ndim):
-            for direction in [-1, 1]:
-                offset = [0] * ndim
-                offset[dim] = direction
-                offsets.append(tuple(offset))
-        return offsets

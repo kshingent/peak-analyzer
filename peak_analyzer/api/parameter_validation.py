@@ -13,7 +13,7 @@ class ParameterValidator:
     Validates input parameters for peak analysis algorithms.
     """
     
-    VALID_STRATEGIES = {'auto', 'union_find', 'plateau_first', 'hybrid'}
+    VALID_STRATEGIES = {'auto', 'union_find', 'plateau_first'}
     VALID_BOUNDARY_TYPES = {'infinite_height', 'infinite_depth', 'periodic', 'custom'}
     
     def __init__(self):

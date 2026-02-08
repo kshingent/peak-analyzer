@@ -52,7 +52,7 @@ peak_analyzer/
 │   │   ├── base_strategy.py         # Strategy base class
 │   │   ├── union_find_strategy.py   # Union-Find strategy
 │   │   ├── plateau_first_strategy.py # Plateau-first strategy
-│   │   ├── hybrid_strategy.py       # Hybrid strategy
+│   │   ├── plateau_first_strategy.py # Plateau-first strategy
 │   │   └── strategy_factory.py      # Strategy factory
 │   │
 │   ├── features/                     # Feature Calculation Layer

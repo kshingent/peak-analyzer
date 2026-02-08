@@ -38,7 +38,7 @@ class PeakAnalyzer:
         Parameters:
         -----------
         strategy : str
-            Detection strategy ('auto', 'union_find', 'plateau_first', 'hybrid')
+            Detection strategy ('auto', 'union_find', 'plateau_first')
         connectivity : str or int
             Integer k-connectivity (1 ≤ k ≤ ndim)
         boundary : str

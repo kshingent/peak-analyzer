@@ -52,7 +52,7 @@ peak_analyzer/
 │   │   ├── base_strategy.py         # 戦略基底クラス
 │   │   ├── union_find_strategy.py   # Union-Find戦略
 │   │   ├── plateau_first_strategy.py # プラトー優先戦略
-│   │   ├── hybrid_strategy.py       # ハイブリッド戦略
+│   │   ├── plateau_first_strategy.py # プラトー優先戦略
 │   │   └── strategy_factory.py      # 戦略ファクトリー
 │   │
 │   ├── features/                     # 特徴量計算レイヤー
