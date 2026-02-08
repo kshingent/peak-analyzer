@@ -222,32 +222,63 @@ class CoordinateMapping:
     axis_names: tuple[str, ...] = ('x', 'y', 'z') # Coordinate axis names
 ```
 
-## Boundary Processing Classes
+## Boundary Processing
 
-### **boundary/boundary_conditions.py**
+Boundary handling is implemented with simple padding:
+
+- **infinite_height**: Pad data with infinite values (default)
+- **infinite_depth**: Pad data with negative infinite values
+
 ```python
-class BoundaryHandler:
-    def __init__(boundary_type: str, boundary_value: float | None)
-    def extend_data_with_boundary(data) -> np.ndarray
-    def remove_boundary_artifacts(peaks) -> list[Peak]
-    
-def infinite_height_boundary(data) -> np.ndarray
-def infinite_depth_boundary(data) -> np.ndarray
-def periodic_boundary(data) -> np.ndarray
+# Simple padding implementation
+padded_data = np.pad(data, 1, mode='constant', constant_values=pad_value)
 ```
 
-### **boundary/boundary_handler.py**
-```python
-class BoundaryHandler:
-    def __init__(self, boundary_type, boundary_value: float | None = None)
-    def extend_data_with_boundary(self, data) -> np.ndarray
-    def remove_boundary_artifacts(self, peaks, min_distance) -> list[Peak]
-    def handle_edge_effects(self, peaks, data_shape) -> list[Peak]
+Boundary value handling:
+- During prominence calculation, infinite values are skipped for efficiency
+- Padding is always fixed at 1 pixel
 
-def infinite_height_boundary(data, pad_width=1) -> np.ndarray
-def periodic_boundary(data, pad_width=1) -> np.ndarray
-def custom_boundary(data, boundary_value, pad_width=1) -> np.ndarray
+## Boundary Conditions and Prominence Calculation Constraints
+
+### **Boundary Condition Selection Constraints**
+
+**Only 2 boundary conditions are practical:**
+
+**1. infinite_height (Recommended・Default)**
+- Prominence calculation possible for all peaks
+- Treats boundary as infinitely high walls
+- Most natural interpretation in topographical analysis
+
+**2. infinite_depth**
+- Prominence calculation possible for all peaks except the global maximum
+- Global maximum prominence = global maximum height - global minimum height
+- Treats boundary as infinitely deep valleys
+
+**Problems with periodic, constant, mirror, nearest, etc.:**
+- Create "artificial terrain" beyond the boundary
+- Prominence calculation becomes dependent on boundary condition assumptions
+- Results lack topographical meaning
+- **Not applicable for prominence calculation**
+
+### **Global Maximum Peak Handling in infinite_depth**
+```python
+# Global maximum peak handling in infinite_depth case
+global_max_peak = find_global_maximum(peaks)
+global_min_height = find_global_minimum(data)
+
+for peak in peaks:
+    if peak == global_max_peak:
+        # Global maximum prominence = height difference from lowest point
+        peak.prominence = peak.height - global_min_height
+    else:
+        # Other peaks use standard calculation
+        peak.prominence = calculate_standard_prominence(peak)
 ```
+
+### **Boundary Condition Selection Guidelines**
+- **Default**: `infinite_height` - Most safe and general approach
+- **Special cases**: `infinite_depth` - When emphasizing peaks near boundaries
+- **Others**: Used only for peak detection, prominence calculation disabled
 
 ## Data Management Classes
 

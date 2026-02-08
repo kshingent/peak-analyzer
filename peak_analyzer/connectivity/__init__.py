@@ -6,7 +6,7 @@ and distance metrics for N-dimensional spatial analysis.
 
 Classes:
 --------
-ConnectivityPattern : Abstract base for connectivity patterns -> Connectivity
+Connectivity : Abstract base for connectivity patterns
 FaceConnectivity : Face connectivity (4-conn in 2D, 6-conn in 3D)
 EdgeConnectivity : Edge connectivity (8-conn in 2D, 18-conn in 3D)
 VertexConnectivity : Vertex connectivity (8-conn in 2D, 26-conn in 3D)

@@ -222,32 +222,63 @@ class CoordinateMapping:
     axis_names: tuple[str, ...] = ('x', 'y', 'z') # 座標軸名
 ```
 
-## 境界処理クラス
+## 境界処理
 
-### **boundary/boundary_conditions.py**
+境界処理はシンプルなパディングで実装されます：
+
+- **infinite_height**: データを無限値でパディング（デフォルト）
+- **infinite_depth**: データを負の無限値でパディング
+
 ```python
-class BoundaryHandler:
-    def __init__(boundary_type: str, boundary_value: float | None)
-    def extend_data_with_boundary(data) -> np.ndarray
-    def remove_boundary_artifacts(peaks) -> list[Peak]
-    
-def infinite_height_boundary(data) -> np.ndarray
-def infinite_depth_boundary(data) -> np.ndarray
-def periodic_boundary(data) -> np.ndarray
+# シンプルなパディング実装
+padded_data = np.pad(data, 1, mode='constant', constant_values=pad_value)
 ```
 
-### **boundary/boundary_handler.py**
-```python
-class BoundaryHandler:
-    def __init__(self, boundary_type, boundary_value: float | None = None)
-    def extend_data_with_boundary(self, data) -> np.ndarray
-    def remove_boundary_artifacts(self, peaks, min_distance) -> list[Peak]
-    def handle_edge_effects(self, peaks, data_shape) -> list[Peak]
+境界値の扱い：
+- プロミネンス計算中、無限値は効率のためスキップされる
+- パディングは常に1ピクセル固定
 
-def infinite_height_boundary(data, pad_width=1) -> np.ndarray
-def periodic_boundary(data, pad_width=1) -> np.ndarray
-def custom_boundary(data, boundary_value, pad_width=1) -> np.ndarray
+## 境界条件とプロミネンス計算の制約
+
+### **境界条件の選択制約**
+
+**実用的な境界条件は2種類のみ:**
+
+**1. infinite_height（推奨・デフォルト）**
+- 全てのピークでプロミネンス計算が可能
+- 境界を無限に高い壁として扱う
+- 地形学的に最も自然な解釈
+
+**2. infinite_depth**  
+- 最高ピーク以外でプロミネンス計算が可能
+- 最高ピークのプロミネンス = 最高ピーク高度 - 最低地点高度
+- 境界を無限に深い谷として扱う
+
+**periodic, constant, mirror, nearest等の問題:**
+- 境界の向こう側に「仮想的な地形」を作り出す
+- プロミネンス計算が境界条件の仮定に依存してしまう  
+- 地形学的意味を持たない結果になる
+- **プロミネンス計算には適用不可**
+
+### **infinite_depthでの最高ピーク処理**
+```python
+# infinite_depthの場合の最高ピーク処理
+global_max_peak = find_global_maximum(peaks)
+global_min_height = find_global_minimum(data)
+
+for peak in peaks:
+    if peak == global_max_peak:
+        # 最高ピークのプロミネンス = 最低地点からの高さ
+        peak.prominence = peak.height - global_min_height
+    else:
+        # 他のピークは通常計算
+        peak.prominence = calculate_standard_prominence(peak)
 ```
+
+### **境界条件選択の指針**
+- **デフォルト**: `infinite_height` - 最も安全で一般的
+- **特殊ケース**: `infinite_depth` - 境界近くのピークも重視する場合
+- **その他**: ピーク検出のみで使用、プロミネンス計算は無効化される
 
 ## データ管理クラス
 

@@ -39,7 +39,10 @@ class PlateauFirstStrategy(BaseStrategy):
         """
         super().__init__(config, **kwargs)
         self.plateau_detector = PlateauDetector(self.config.connectivity)
-        self.prominence_calculator = ProminenceCalculator(self.config.connectivity)
+        self.prominence_calculator = ProminenceCalculator(
+            connectivity=self.config.connectivity,
+            boundary_condition=self.config.boundary_type  # 境界条件を渡す
+        )
         
         # Strategy-specific parameters
         self.dilation_structure = kwargs.get('dilation_structure', None)

@@ -6,7 +6,7 @@ proper plateau handling and topographic feature extraction.
 
 This library provides a 7-layer modular architecture for comprehensive
 peak analysis including coordinate systems, spatial connectivity,
-boundary handling, and advanced feature extraction.
+advanced feature extraction.
 """
 
 # Core components
@@ -18,7 +18,6 @@ from .api.result_dataframe import LazyDataFrame
 from . import features
 from . import connectivity
 from . import coordinate_system
-from . import boundary
 from . import data
 from . import utils
 
@@ -43,13 +42,6 @@ from .coordinate_system import (
     CoordinateMapping,
     GridManager,
     SpatialIndexFactory
-)
-
-# Boundary handling
-from .boundary import (
-    BoundaryManager,
-    EdgeDetector,
-    create_boundary_condition
 )
 
 # Data management
@@ -82,7 +74,6 @@ __all__ = [
     "features",
     "connectivity", 
     "coordinate_system",
-    "boundary",
     "data",
     "utils",
     
@@ -102,11 +93,6 @@ __all__ = [
     "CoordinateMapping",
     "GridManager",
     "SpatialIndexFactory",
-    
-    # Boundary handling
-    "BoundaryManager",
-    "EdgeDetector",
-    "create_boundary_condition",
     
     # Data management
     "validate_peak_data",

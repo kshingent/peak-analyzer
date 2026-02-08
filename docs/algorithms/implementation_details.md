@@ -153,10 +153,12 @@ while priority_queue not empty:
 - Calculate prominence as height difference
 
 ## Edge/Boundary Handling
-- **Infinite Height Boundary**: Pad data edges with maximum float value
-- **Infinite Depth Boundary**: Pad data edges with minimum float value  
-- **Periodic Boundary**: Wrap data edges with opposite edge values
-- **Custom Boundary**: User-specified constant values at edges
+- **Infinite Height Boundary**: Pad data edges with infinite values (default)
+  - Ensures boundary regions never interfere with peak prominence calculations
+  - Mathematically sound for all peak detection and prominence algorithms
+- **Infinite Depth Boundary**: Pad data edges with negative infinite values
+  - Used in special cases where boundary-adjacent peaks need emphasis
+  - Global maximum peak prominence calculated as height above global minimum
 - **Artifact Removal**: Filter out peaks too close to data boundaries
 
 ## N-Dimensional Connectivity

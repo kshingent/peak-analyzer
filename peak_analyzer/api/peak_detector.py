@@ -9,7 +9,6 @@ import numpy as np
 from peak_analyzer.core.strategy_manager import StrategyManager
 from peak_analyzer.coordinate_system.grid_manager import GridManager
 from peak_analyzer.coordinate_system.coordinate_mapping import CoordinateMapping
-from peak_analyzer.boundary.boundary_conditions import BoundaryManager
 from peak_analyzer.data.validation import validate_peak_data
 from .result_dataframe import PeakCollection
 from .parameter_validation import ParameterValidator
@@ -42,7 +41,7 @@ class PeakAnalyzer:
         connectivity : str or int
             Integer k-connectivity (1 ≤ k ≤ ndim)
         boundary : str
-            Boundary condition ('infinite_height', 'infinite_depth', 'periodic', 'custom')
+            Boundary condition ('infinite_height', 'infinite_depth')
         scale : float or list of float
             Physical scale for each dimension (real-world units per pixel)
         minkowski_p : float
@@ -106,23 +105,21 @@ class PeakAnalyzer:
         
         self.grid_manager = GridManager(coordinate_mapping, self.connectivity)
         
-        # Set up boundary handling - needs data shape, so initialize here
-        from peak_analyzer.boundary.boundary_conditions import NoBoundary, ConstantBoundary
+        # Simple boundary padding
         if self.boundary_type == 'infinite_height':
-            boundary_condition = ConstantBoundary(value=float('inf'))
-        elif self.boundary_type == 'infinite_depth':  
-            boundary_condition = ConstantBoundary(value=float('-inf'))
+            pad_value = float('inf')
+        elif self.boundary_type == 'infinite_depth':
+            pad_value = float('-inf')
         else:
-            boundary_condition = NoBoundary()  # Default fallback
-            
-        self.boundary_handler = BoundaryManager(
-            shape=data.shape, 
-            boundary_conditions=boundary_condition
-        )
+            raise ValueError(f"Invalid boundary type: {self.boundary_type}. "
+                           "Only 'infinite_height' and 'infinite_depth' are supported.")
         
-        # Note: extend_data_with_boundary method doesn't exist in BoundaryManager
-        # Using original data for now - boundary handling needs to be implemented
-        padded_data = data  # TODO: Implement proper boundary extension
+        self.padded_data = np.pad(data, 1, mode='constant', constant_values=pad_value)
+        self.original_slice = tuple(slice(1, 1 + s) for s in data.shape)
+        
+        # Apply boundary extension for peak detection
+        padding = self.kwargs.get('boundary_padding', 1)  # Default padding of 1
+        padded_data, original_slice = self.boundary_handler.extend_data(data, padding)
         
         # Select optimal strategy
         strategy = self.strategy_manager.select_optimal_strategy(data)
@@ -130,9 +127,9 @@ class PeakAnalyzer:
         # Execute peak detection
         peaks = strategy.detect_peaks(padded_data, **self.kwargs)
         
-        # Note: remove_boundary_artifacts method doesn't exist in BoundaryManager  
-        # Using original peaks for now - artifact removal needs to be implemented
-        filtered_peaks = peaks  # TODO: Implement proper boundary artifact removal
+        # Remove boundary artifacts - filter peaks too close to original data boundaries
+        min_distance = self.kwargs.get('min_boundary_distance', padding)
+        filtered_peaks = self._remove_boundary_artifacts(peaks, data.shape, padding, min_distance)
         
         # Create peak collection
         peak_collection = PeakCollection(
@@ -216,3 +213,53 @@ class PeakAnalyzer:
         """
         # Implementation will be added
         pass
+
+    def _remove_boundary_artifacts(self, peaks, original_shape: tuple[int, ...], 
+                                 padding: int, min_distance: int) -> list:
+        """
+        Remove peaks that are too close to data boundaries (likely artifacts).
+        
+        Parameters:
+        -----------
+        peaks : list
+            List of detected peaks
+        original_shape : tuple of int
+            Shape of original data (without padding)
+        padding : int
+            Padding applied to data
+        min_distance : int
+            Minimum distance from boundary for valid peaks
+            
+        Returns:
+        --------
+        list
+            Filtered peaks with boundary artifacts removed
+        """
+        if not peaks:
+            return peaks
+            
+        filtered_peaks = []
+        
+        for peak in peaks:
+            # Adjust peak coordinates to original data space
+            original_coords = tuple(coord - padding for coord in peak.coordinates)
+            
+            # Check if peak is too close to any boundary
+            is_valid = True
+            for dim, (coord, size) in enumerate(zip(original_coords, original_shape)):
+                if coord < min_distance or coord >= size - min_distance:
+                    is_valid = False
+                    break
+            
+            if is_valid:
+                # Create new peak with adjusted coordinates
+                adjusted_peak = peak.__class__(
+                    coordinates=original_coords,
+                    height=peak.height,
+                    # Copy other attributes if they exist
+                    **{attr: getattr(peak, attr) for attr in ['prominence', 'area', 'isolation'] 
+                       if hasattr(peak, attr)}
+                )
+                filtered_peaks.append(adjusted_peak)
+                
+        return filtered_peaks

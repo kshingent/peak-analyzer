@@ -349,7 +349,11 @@ class UnionFindStrategy(BaseStrategy):
         
         while queue:
             current_point, path_min_height = queue.popleft()
+            
+            # Skip infinite boundary points for efficiency
             current_height = data[current_point]
+            if not np.isfinite(current_height):
+                continue
             
             # Update minimum height along path
             path_min_height = min(path_min_height, current_height)
@@ -367,6 +371,10 @@ class UnionFindStrategy(BaseStrategy):
             neighbors = self._get_valid_neighbors(current_point, data.shape)
             for neighbor in neighbors:
                 if neighbor not in visited:
+                    # Skip infinite boundary points in neighbor exploration
+                    neighbor_height = data[neighbor]
+                    if not np.isfinite(neighbor_height):
+                        continue
                     visited.add(neighbor)
                     queue.append((neighbor, path_min_height))
         
@@ -407,18 +415,16 @@ class UnionFindStrategy(BaseStrategy):
         return neighbors
     
     def _find_boundary_minimum(self, data: np.ndarray) -> float:
-        """Find minimum value on data boundary."""
-        min_val = float('inf')
+        """Find boundary value based on boundary condition."""
+        boundary_type = self.config.boundary_type
         
-        for dim in range(data.ndim):
-            for side in [0, -1]:
-                slices = [slice(None)] * data.ndim
-                slices[dim] = side
-                boundary_face = data[tuple(slices)]
-                face_min = np.min(boundary_face)
-                min_val = min(min_val, face_min)
-        
-        return min_val
+        if boundary_type == 'infinite_height':
+            return float('inf')  # 境界は常に地形より高い
+        elif boundary_type == 'infinite_depth':
+            return float('-inf')  # 境界は常に地形より低い
+        else:
+            raise ValueError(f"Invalid boundary type: {boundary_type}. "
+                           "Only 'infinite_height' and 'infinite_depth' are supported.")
     
     def calculate_features(self, peaks: list[Peak], data: np.ndarray) -> dict[Peak, dict[str, Any]]:
         """Calculate features for detected peaks."""

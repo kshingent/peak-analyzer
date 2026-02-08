@@ -14,7 +14,9 @@ class ParameterValidator:
     """
     
     VALID_STRATEGIES = {'auto', 'union_find', 'plateau_first'}
-    VALID_BOUNDARY_TYPES = {'infinite_height', 'infinite_depth', 'periodic', 'custom'}
+    VALID_BOUNDARY_TYPES = {
+        'infinite_height', 'infinite_depth'
+    }
     
     def __init__(self):
         """Initialize parameter validator."""

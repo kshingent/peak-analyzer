@@ -38,7 +38,7 @@ class ProminenceCalculator:
     Calculates prominence using height-priority terrain exploration.
     """
     
-    def __init__(self, connectivity: int = 1):
+    def __init__(self, connectivity: int = 1, boundary_condition=None):
         """
         Initialize prominence calculator.
         
@@ -46,8 +46,11 @@ class ProminenceCalculator:
         -----------
         connectivity : str or int
             Connectivity type for path finding
+        boundary_condition : BoundaryCondition, optional
+            Boundary condition for prominence calculation
         """
         self.connectivity = connectivity
+        self.boundary_condition = boundary_condition
         self.path_finder = PathFinder(connectivity)
         
     def calculate_prominence(self, peak: Peak, data: np.ndarray, wlen: float | None = None) -> float:
@@ -299,17 +302,33 @@ class ProminenceCalculator:
         )
     
     def _find_boundary_minimum(self, data: np.ndarray) -> float:
-        """Find minimum value on data boundary."""
+        """Find boundary value based on boundary condition."""
+        if self.boundary_condition is None:
+            raise ValueError("Boundary condition must be specified for prominence calculation")
+            
+        # 境界条件に基づく境界値
+        boundary_type = getattr(self.boundary_condition, 'boundary_type', None)
+        if boundary_type is None:
+            # boundary_conditionが文字列の場合
+            boundary_type = self.boundary_condition
+            
+        if boundary_type == 'infinite_height':
+            return float('inf')
+        elif boundary_type == 'infinite_depth':
+            return float('-inf')  
+        else:
+            raise ValueError(f"Invalid boundary type: {boundary_type}. "
+                           "Only 'infinite_height' and 'infinite_depth' are supported.")
+    
+    def _get_actual_boundary_minimum(self, data: np.ndarray) -> float:
+        """Get actual minimum value from data boundary."""
         min_val = float('inf')
         
-        # Check each face of the N-dimensional boundary
         for dim in range(data.ndim):
             for side in [0, -1]:
-                # Create slice for this boundary face
                 slices = [slice(None)] * data.ndim
                 slices[dim] = side
                 boundary_face = data[tuple(slices)]
-                
                 face_min = np.min(boundary_face)
                 min_val = min(min_val, face_min)
                 
