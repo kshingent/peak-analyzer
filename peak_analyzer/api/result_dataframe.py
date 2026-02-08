@@ -6,30 +6,13 @@ Provides data containers for peak collections and lazy feature computation.
 
 import pandas as pd
 import numpy as np
-from dataclasses import dataclass
-
-from pyparsing import Any
+from typing import Any
 
 from peak_analyzer.core.virtual_peak_handler import VirtualPeak
 
+from ..core.peak_data import Peak
 from ..coordinate_system.grid_manager import GridManager
 from ..features.lazy_feature_manager import LazyFeatureManager
-
-
-@dataclass
-class Peak:
-    """
-    Represents a single detected peak with index and coordinate information.
-    """
-    center_indices: tuple       # Internal processing indices (i, j, k, ...)
-    center_coordinates: tuple   # User-facing coordinates (x, y, z, ...)
-    plateau_indices: list[tuple]  # Region in index space
-    height: float               # Peak height value
-    
-    @property
-    def coordinate_dict(self) -> dict[str, float]:
-        """Return coordinates as dictionary {axis_name: value}."""
-        return {f"axis_{i}": coord for i, coord in enumerate(self.center_coordinates)}
 
 
 class PeakCollection:

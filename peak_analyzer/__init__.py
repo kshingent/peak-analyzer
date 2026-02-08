@@ -10,9 +10,8 @@ boundary handling, and advanced feature extraction.
 """
 
 # Core components
-from .core.peak_detector import PeakAnalyzer
-from .core.peak_region import PeakRegion
-from .core.lazy_dataframe import LazyDataFrame
+from .api.peak_detector import PeakAnalyzer
+from .api.result_dataframe import Peak, LazyDataFrame
 
 # Layer imports with submodule access
 from . import features
@@ -75,7 +74,7 @@ __author__ = "peak-analyzer team"
 __all__ = [
     # Core components
     "PeakAnalyzer",
-    "PeakRegion",
+    "Peak",
     "LazyDataFrame",
     
     # Layer modules
